@@ -53,6 +53,12 @@
       "scope": "separate operator_manual_ui evidence for the 2026-09-11 simulation rehearsal, not an official test. It records the user-provided counts total 12, omnidirectional 12, directional 0 and references the automatic Runner summary without changing it.",
       "command": "Recorded separately from the Runner output; no Runner calculation or UI test code is represented",
       "test_command": "python -m json.tool output/results/problem_3/20260911_rehearsal_attempt2_ui_evidence.json"
+    },
+    {
+      "path": "docs/draft_problem_3.md",
+      "scope": "Question 3 paper draft. It distinguishes the single 2026-09-11 simulation rehearsal from any formal test, and uses only the frozen summary plus separate operator UI evidence for reported source counts.",
+      "command": "Markdown draft generated from docs/problem_3_model_contract.md and frozen rehearsal evidence",
+      "test_command": "python -m pytest -p no:cacheprovider tests -q; evidence cross-check against the two JSON artifacts"
     }
   ],
   "stale_downstream_artifacts": [],
@@ -64,6 +70,7 @@
     "Question 3 teammate solution fails the current static guarantee audit; see docs/problem_3_audit.md before modifying or rehearsing.",
     "CUA cannot currently discover the emulator window, so the active test mode cannot be independently confirmed; do not call /enter until the interface visibly indicates Question 3 rehearsal.",
     "Question 3 has only one archived rehearsal result. The user-provided UI source counts are stored separately from the automatic summary and must retain that provenance; any formal-test decision requires separate authorization and fresh mode confirmation.",
+    "The summary references logs/problem_3/20260911_rehearsal_attempt2_actions.jsonl, but that JSONL file is absent from the current workspace. Do not report action counts, per-action timing, or request-level statistics in the paper until the log is recovered or regenerated in a future rehearsal.",
     "The 7-point coverage and post-bearing geometry are mathematical guarantees under their stated range and error assumptions. They do not remove the need to validate accepted responses, timeout/retry behavior, and source-count reporting at the actual interface."
   ]
 }
