@@ -1,0 +1,82 @@
+{
+  "action_log_path": "logs\\problem_3\\20260911_rehearsal_attempt2_actions.jsonl",
+  "cleared_channels": [
+    2,
+    3,
+    6,
+    7,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    17,
+    20
+  ],
+  "command_parameters": {
+    "log_filename": "20260911_rehearsal_attempt2_actions.jsonl",
+    "output_filename": "20260911_rehearsal_attempt2_summary.json",
+    "rehearsal_confirmed": true
+  },
+  "configuration_hash": "de837a8d3d078ddfde0814610eb70f7643a59ed29eedd3920657a2d774f7dd5e",
+  "configured_scan_point_count": 7,
+  "discovered_channels": [
+    2,
+    3,
+    6,
+    7,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    17,
+    20
+  ],
+  "localization_statuses": {
+    "10": "polygon",
+    "11": "polygon",
+    "12": "polygon",
+    "13": "polygon",
+    "14": "polygon",
+    "15": "polygon",
+    "17": "polygon",
+    "2": "polygon",
+    "20": "polygon",
+    "3": "polygon",
+    "6": "polygon",
+    "7": "polygon"
+  },
+  "observation_counts": {
+    "10": 3,
+    "11": 2,
+    "12": 2,
+    "13": 2,
+    "14": 2,
+    "15": 2,
+    "17": 3,
+    "2": 2,
+    "20": 2,
+    "3": 3,
+    "6": 3,
+    "7": 3
+  },
+  "remaining_real_duration_s": 1200.0,
+  "reported_total_sources": 12,
+  "run_mode": "rehearsal",
+  "scan_point_count": 7,
+  "schema": "problem_3_rehearsal_summary",
+  "status": "completed",
+  "stop_reason": "completed",
+  "time_limit_policy": {
+    "max_network_attempts_per_action": 3,
+    "request_timeout_s": 2.0,
+    "safety_margin_basis": "3*2s business retries + 3*2s exit retries + 5s reserve",
+    "safety_margin_s": 17.0
+  },
+  "unresolved_channels": [],
+  "version": "1.0",
+  "virtual_time_s": 5989.83057
+}

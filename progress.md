@@ -53,3 +53,10 @@
 - 用户确认模拟器窗口已置顶后，重置 CUA 会话并再次捕获，结果仍为 `apps=[]` 且报 `unsupported Codex auth method: apikey`。该自动化桥连续三次未能暴露本地应用窗口，按故障处理规则不再重复尝试；仍未调用模拟器接口。
 - 用户手动启动问题三演练并明确反馈接口就绪后，运行队友原始 `test_run.py` 取得基线：12 个发现频道全部清除，虚拟时间 10896.8 s，340 次扫描测向和 46 次逼近测向。其汇总 CSV 已复制为规范化结果文件 `output/results/problem_3/baseline_teammate_17point_20260910.csv`；不将该脚本的“发现频道清除率”表述为全源清除率。
 - 用户选择项目内 `.worktrees/` 作为问题三重构隔离位置。下一步先提交本轮演练证据和忽略规则，再从干净 `main` 建立 `refactor/problem-3-safe-rehearsal` 工作树。
+
+## 2026-09-11（问题三模拟演练证据归档）
+
+- **已完成：** 仅在操作者手动确认 UI 为“问题三—模拟演练”后，归档成功摘要 `output/results/problem_3/20260911_rehearsal_attempt2_summary.json`。摘要记录状态 `completed`、12 discovered、12 cleared、0 unresolved 与 5989.83057 虚拟秒；这是模拟演练，不是正式测试。
+- **已完成：** 用户 UI 人工回填为总数 12、全向 12、定向 0，并写入摘要的 `reported_total_sources`；该界面读数与摘要中的发现/清除计数一致。动作明细 `logs/problem_3/20260911_rehearsal_attempt2_actions.jsonl` 保持本地忽略，不提交。
+- **影响范围：** 仅整理问题三的成功演练结果、Git 忽略规则、缓存索引和协作文档；不改变数学模型、接口实现、队友原始脚本或 DOCX，也不触发任何模拟器/HTTP 动作。
+- **需要验证：** 7 点覆盖、闭角域定位与协议重试规则仍须在其假设和 `accepted` 响应下核验；用户提供的 UI 回填应保留其人工来源。若需问题三正式测试，必须由用户在后续单独授权并由操作者再次确认 UI 模式。

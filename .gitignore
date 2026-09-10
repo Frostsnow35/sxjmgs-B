@@ -10,6 +10,8 @@ venv/
 # Local planning/rendering/runtime artifacts
 tmp/
 logs/
+# Question 3 rehearsal action logs are runtime evidence and stay local.
+logs/problem_3/*.jsonl
 .worktrees/
 .pnpm-store/
 tools/

@@ -2,8 +2,8 @@
   "contest": "2026 CUMCM",
   "problem": "B 无线电干扰源的快速自动定位与清除",
   "mode": "manual_checkpoint",
-  "current_gate": "G2_question_3_teammate_solution_audited_design_pending",
-  "date": "2026-09-10",
+  "current_gate": "G2_question_3_successful_rehearsal_archived_formal_test_pending_user_authorization",
+  "date": "2026-09-11",
   "files_received": [
     "issue/B/B题.pdf",
     "issue/B/附件/1.docx",
@@ -17,10 +17,13 @@
     "问题 1–2 文档与接口核验已完成，但尚未开始求解。",
     "未得到用户当次明确批准，禁止开始问题 4 的正式测试。",
     "2026-09-10：用户明确批准开始问题一和问题二的离线正式求解；模拟器仍不得调用。",
-    "2026-09-10：用户授权问题三方案审查、修改与模拟器演练；本轮禁止任何正式测试。"
+    "2026-09-10：用户授权问题三方案审查、修改与模拟器演练；本轮禁止任何正式测试。",
+    "2026-09-11：仅在操作者确认 UI 为问题三模拟演练后完成一次成功演练；该次运行不是正式测试。",
+    "2026-09-11：用户 UI 人工回填为总数 12、全向 12、定向 0；该回填与演练摘要中的 12 discovered、12 cleared 一致。"
   ],
   "simulator_policy": {
     "current_status": "question_3_rehearsal_authorized_formal_tests_prohibited",
+    "question_3_rehearsal_entry": "only after an operator manually confirms the UI is Question 3 rehearsal; do not probe or substitute a formal-test entry",
     "question_3_formal_test": "requires_explicit_user_approval_after_rehearsal_evidence",
     "question_4_formal_test": "requires_explicit_user_approval_each_start; never_trigger_implicitly",
     "formal_attempts_per_question": 3,
@@ -38,6 +41,12 @@
       "scope": "one Question 3 rehearsal using the teammate 17-point test script; measures cleared/found channels only, not the simulator-reported source-total clearance ratio",
       "command": "python test_run.py (workdir: q3-solution/code; only after user-confirmed Question 3 rehearsal interface readiness)",
       "test_command": "not applicable: original teammate script has no automated test suite"
+    },
+    {
+      "path": "output/results/problem_3/20260911_rehearsal_attempt2_summary.json",
+      "scope": "2026-09-11 Question 3 operator-confirmed rehearsal only; status completed with 12 discovered, 12 cleared, 0 unresolved, and 5989.83057 virtual seconds. The user manually reported the UI counts as total 12, omnidirectional 12, directional 0; this is consistent with the summary counts. It is not a formal-test result or a general clearance conclusion.",
+      "command": "Question 3 rehearsal entry only after operator UI confirmation; no formal-test entry was used",
+      "test_command": "python -m pytest -p no:cacheprovider tests -q"
     }
   ],
   "stale_downstream_artifacts": [],
@@ -47,6 +56,8 @@
     "Question 2 grid samples are finite proxies for U_1; grid-refinement evidence is still required before freezing a decision recommendation.",
     "Pytest cache writes can leave unreadable temporary directories in the project root; use the recorded scoped test command.",
     "Question 3 teammate solution fails the current static guarantee audit; see docs/problem_3_audit.md before modifying or rehearsing.",
-    "CUA cannot currently discover the emulator window, so the active test mode cannot be independently confirmed; do not call /enter until the interface visibly indicates Question 3 rehearsal."
+    "CUA cannot currently discover the emulator window, so the active test mode cannot be independently confirmed; do not call /enter until the interface visibly indicates Question 3 rehearsal.",
+    "Question 3 has only one archived rehearsal result. Its UI source-count fields were manually reported by the user and must retain that provenance; any formal-test decision requires separate authorization and fresh mode confirmation.",
+    "The 7-point coverage and post-bearing geometry are mathematical guarantees under their stated range and error assumptions. They do not remove the need to validate accepted responses, timeout/retry behavior, and source-count reporting at the actual interface."
   ]
 }
