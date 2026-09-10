@@ -25,7 +25,7 @@
 | 问题一 | 每个频道的全部 `direction` 被转成 `(x, y, bearing_deg)`，调用 `locate_from_bearings(error_deg=1, target_radius_m=1800)`；运行器不以 LS 替代该闭角域交集。 |
 | 问题二 | 单条首测方向以 `S'=S+750u(θ)+600v(θ)` 调用 `guaranteed_second_point`，随后才定位。 |
 | 问题三 | 只有 `/clear` 的 `clear_result == "success"` 才进入 `cleared_channels`；`no_signal`、清除失败和候选耗尽均保留未完成频道。 |
-| 协议与日志 | `RehearsalClient` 负责 JSONL 请求--响应日志；Runner 只引用日志路径并写脱敏汇总，不记录 robot ID、接口密钥或 UI 测试码。 |
+| 协议与日志 | `RehearsalClient` 负责 JSONL 请求--响应日志；本地日志中的 `robot_id` 固定为 `<redacted>`，不含队号、接口密钥或 UI 测试码；实际 HTTP payload 仍携带队号以满足协议。Runner 只引用日志路径并写脱敏汇总。 |
 | 正式测试 | 本入口不判断 UI 模式、不开启也不模拟正式测试。正式测试必须在当次另获用户明确授权并冻结版本。 |
 
 ## 输入、输出与运行边界
@@ -36,15 +36,15 @@
 |---|---|---|
 | `--robot-id` | `str`，必填 | 仅传给协议客户端；不会写入摘要。 |
 | `--rehearsal-confirmed` | `bool`，默认 `false` | 必须显式出现。缺失时入口在创建客户端前退出，动作数为 0。 |
-| `--output` | `Path`，必填 | UTF-8 汇总 JSON；父目录自动创建。 |
-| `--log` | `Path`，必填 | `RehearsalClient` 的 JSONL 审计日志路径。 |
+| `--output` | `Path`，必填 | UTF-8 汇总 JSON；构造客户端前预检父目录和文件可写性，不改写已有内容。 |
+| `--log` | `Path`，必填 | `RehearsalClient` 的 JSONL 审计日志路径；构造客户端前预检父目录和文件可写性。 |
 | `--base-url` | `str`，默认 `http://127.0.0.1:2026` | 已确认演练模拟器的基础地址；只在确认标志存在后传入客户端。 |
 
 入口提示为“仅问题三模拟演练；不判断 UI 模式”。`--help` 只解析参数，不构造客户端或发送请求。
 
 ### `run_rehearsal` 内部接口
 
-`run_rehearsal(client, output_path, action_log_path, monotonic=..., command_summary=...) -> dict[str, Any]` 接受有 `enter/measure/clear/exit` 四个同步方法的客户端；测试通过显式 FakeClient 和单调时钟注入执行。该函数始终尽力生成摘要，响应格式或 `SimulatorProtocolError` 出错后停止新的业务动作。
+`run_rehearsal(client, output_path, action_log_path, monotonic=..., command_summary=...) -> dict[str, Any]` 接受有 `enter/measure/clear/exit` 四个同步方法的客户端；测试通过显式 FakeClient 和单调时钟注入执行。该函数始终尽力生成摘要，响应格式或 `SimulatorProtocolError` 出错后停止新的业务动作。摘要写入失败会向 CLI 显式报告，主入口返回非零，不能把未持久化的 `completed` 当作成功。
 
 摘要 JSON 至少包含 `schema/version`、`run_mode="rehearsal"`、`status`、`stop_reason`、已清除/未完成/已发现频道、`reported_total_sources: null`、最后已接受响应的 `virtual_time_s`、enter 响应的 `remaining_real_duration_s`、日志路径、实际与配置扫描点数、每频道观测数、定位状态、脱敏命令参数和配置哈希。
 
@@ -83,7 +83,7 @@ $$S'=S+750u(\theta)+600v(\theta),$$
 
 完整全局网格是**保证性回退，不是高效性结论**：在真实时限内可能耗时很长，候选耗尽或时限到达时频道应留在 `unresolved_channels`，不得声称已清除。
 
-真实时限只认 `/enter` 成功响应的 `remaining_real_duration_s`；不会假设固定 1200 秒。通过可注入单调时钟建立 deadline，每项新的 `measure` 或 `clear` 前预留至少 5 秒。字段缺失、非数或余量不足时停止新动作并写明原因；若已经进入会话，仍尽力只调用一次 `/exit`，其失败不能覆盖先前主失败原因。
+真实时限只认 `/enter` 成功响应的 `remaining_real_duration_s`；不会假设固定 1200 秒。真实客户端的单次 HTTP timeout 固定为 $2\ \mathrm{s}$，协议层最多重试 3 次；通过可注入单调时钟建立 deadline，每项新的 `measure` 或 `clear` 前预留至少 $17\ \mathrm{s}=3\times2+3\times2+5$：覆盖一次最坏业务请求、一次最坏 `/exit` 重试及额外 5 秒余量。字段缺失、非数或剩余时间不大于该余量时停止新动作并写明原因；若已经进入会话，仍尽力只调用一次 `/exit`，其失败不能覆盖先前主失败原因。摘要的 `time_limit_policy` 记录此 timeout、重试次数、余量和计算依据。
 
 ## SHALL 要求与 WHEN/THEN 验收场景
 
@@ -92,10 +92,10 @@ $$S'=S+750u(\theta)+600v(\theta),$$
 3. WHEN 某未清除频道在扫描结束仅有一条 `direction`，THEN Runner SHALL 先调用 `guaranteed_second_point` 并在返回点测量同一频道；`no_signal` 或清除失败 THEN SHALL 仍将其置于未完成处理路径。
 4. WHEN 频道有一条或多条 `direction` 且未清除，THEN Runner SHALL 以 `(x,y,bearing_deg)` 调用 `locate_from_bearings(error_deg=1, target_radius_m=1800)`；不得调用 LS 替代物。
 5. WHEN 定位中心清除未成功，THEN Runner SHALL 依状态选择保守 bbox 并逐点执行有限 `clearance_grid`，直到成功、候选耗尽或时限停止。
-6. WHEN `/enter` 的 `remaining_real_duration_s` 缺失、非数或小于安全余量，THEN Runner SHALL 不再开始 `measure`，摘要 SHALL 写出停止原因；不得使用固定时限猜测。
+6. WHEN `/enter` 的 `remaining_real_duration_s` 缺失、非数或不大于 $17\ \mathrm{s}$ 安全余量，THEN Runner SHALL 不再开始 `measure`，摘要 SHALL 写出停止原因；不得使用固定时限猜测。
 7. WHEN 协议抛出 `SimulatorProtocolError` 或响应缺少约定字段，THEN Runner SHALL 停止后续动作，写失败摘要；已成功 enter 时 SHALL 尽力 `/exit` 一次，而首次 enter 失败时 SHALL 不调用 `/exit`。
 8. WHEN 未传 `--rehearsal-confirmed` 或调用 `--help`，THEN Runner SHALL 不构建真实客户端、不发送 HTTP 请求；未确认摘要 SHALL 不含 robot ID。
-9. WHEN 汇总写入，THEN 它 SHALL 为 UTF-8 JSON、创建父目录、将发现频道与 `reported_total_sources=null` 分开，并提供可复算的配置哈希。
+9. WHEN `--output` 或 `--log` 是目录或不可写，THEN 主入口 SHALL 在构造客户端前返回非零；预检不得改写已有摘要。WHEN 汇总写入，THEN 它 SHALL 为 UTF-8 JSON、创建父目录、将发现频道与 `reported_total_sources=null` 分开，并提供可复算的配置哈希；写入失败 SHALL 返回非零。
 
 ## 验证状态与局限
 

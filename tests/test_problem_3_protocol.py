@@ -178,7 +178,7 @@ def test_client_rejects_http_error_even_when_body_claims_accepted() -> None:
     record = json.loads(log_path.read_text(encoding="utf-8"))
     assert record["path"] == "/enter"
     assert record["http_status"] == 500
-    assert record["payload"]["robot_id"] == "team"
+    assert record["payload"]["robot_id"] == "<redacted>"
     assert record["response"] == {"accepted": True}
     assert record["exception"] is None
     assert response.json_calls == 1
@@ -231,6 +231,22 @@ def test_network_retry_reuses_the_exact_payload_and_request_id() -> None:
     assert records[0]["http_status"] is None
     assert records[1]["http_status"] == 200
     assert records[1]["response"] == {"accepted": True}
+
+
+def test_client_redacts_robot_id_in_jsonl_without_changing_http_payload() -> None:
+    """审计日志不能泄露队号，但实际协议请求仍必须保留其身份字段。"""
+
+    log_path = new_log_path()
+    session = FakeSession([FakeResponse(200, {"accepted": True})])
+    client = make_client(log_path, session)
+
+    client.enter()
+
+    log_text = log_path.read_text(encoding="utf-8")
+    record = json.loads(log_text)
+    assert session.calls[0]["json"]["robot_id"] == "team"
+    assert record["payload"]["robot_id"] == "<redacted>"
+    assert "team" not in log_text
 
 
 def test_each_new_action_gets_a_fresh_request_id() -> None:

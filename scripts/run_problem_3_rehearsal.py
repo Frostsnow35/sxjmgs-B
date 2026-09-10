@@ -39,7 +39,11 @@ CHANNELS: tuple[int, ...] = tuple(range(1, 21))
 TARGET_RADIUS_M = 1800.0
 BEARING_ERROR_DEG = 1.0
 CLEAR_RADIUS_M = 20.0
-SAFETY_MARGIN_S = 5.0
+# 协议层最多三次重试：业务请求 3×2s、清理 exit 3×2s，再留 5s 固定余量。
+REQUEST_TIMEOUT_S = 2.0
+MAX_NETWORK_ATTEMPTS_PER_ACTION = 3
+SAFETY_MARGIN_S = 17.0
+SAFETY_MARGIN_BASIS = "3*2s business retries + 3*2s exit retries + 5s reserve"
 SCHEMA_NAME = "problem_3_rehearsal_summary"
 SCHEMA_VERSION = "1.0"
 DEFAULT_BASE_URL = "http://127.0.0.1:2026"
@@ -69,6 +73,15 @@ class RehearsalActions(Protocol):
 
 class ResponseSchemaError(RuntimeError):
     """协议客户端以外的响应格式不满足编排器所需字段。"""
+
+
+class SummaryWriteError(RuntimeError):
+    """演练已结束但脱敏摘要无法持久化时抛出，供 CLI 返回非零。"""
+
+    def __init__(self, output_path: Path, summary: Mapping[str, Any]) -> None:
+        super().__init__(f"unable to write rehearsal summary: {output_path}")
+        self.output_path = output_path
+        self.summary = dict(summary)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -111,7 +124,10 @@ def run_rehearsal(
         command_summary: 已脱敏的命令参数摘要；任何身份或凭据键均会被剔除。
 
     Returns:
-        总是尽力写入并返回的结构化汇总。协议或格式错误会标记为失败且不继续动作。
+        成功写入摘要时返回结构化汇总。协议或格式错误会标记为失败且不继续动作。
+
+    Raises:
+        SummaryWriteError: 已结束的演练摘要无法写入 ``output_path``，供调用方返回非零。
     """
 
     observations: dict[int, list[tuple[Point, float]]] = {}
@@ -142,7 +158,7 @@ def run_rehearsal(
         return normalized
 
     def may_start_new_action() -> bool:
-        """在每个非清理动作前保留五秒真实时间安全余量。"""
+        """在每个非清理动作前保留可覆盖请求重试和 exit 的真实时间余量。"""
 
         nonlocal status, stop_reason
         if deadline_s is None:
@@ -330,8 +346,9 @@ def run_rehearsal(
         )
         try:
             _write_summary(output_path, summary)
-        except Exception:  # pragma: no cover - filesystem error is logged for operator recovery
+        except Exception as error:  # pragma: no cover - filesystem error is logged for operator recovery
             LOGGER.exception("failed to persist rehearsal summary")
+            raise SummaryWriteError(output_path, summary) from error
         return summary
 
 
@@ -399,7 +416,7 @@ def _build_summary(
         "target_radius_m": TARGET_RADIUS_M,
         "bearing_error_deg": BEARING_ERROR_DEG,
         "clear_radius_m": CLEAR_RADIUS_M,
-        "real_time_safety_margin_s": SAFETY_MARGIN_S,
+        "time_limit_policy": _time_limit_policy(),
         "command_parameters": safe_command_summary,
     }
     configuration_hash = hashlib.sha256(
@@ -430,6 +447,7 @@ def _build_summary(
         },
         "command_parameters": safe_command_summary,
         "configuration_hash": configuration_hash,
+        "time_limit_policy": _time_limit_policy(),
     }
 
 
@@ -441,6 +459,28 @@ def _write_summary(output_path: Path, summary: Mapping[str, Any]) -> None:
         json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _time_limit_policy() -> dict[str, float | int | str]:
+    """返回可写入摘要和配置哈希的请求超时及安全余量依据。"""
+
+    return {
+        "request_timeout_s": REQUEST_TIMEOUT_S,
+        "max_network_attempts_per_action": MAX_NETWORK_ATTEMPTS_PER_ACTION,
+        "safety_margin_s": SAFETY_MARGIN_S,
+        "safety_margin_basis": SAFETY_MARGIN_BASIS,
+    }
+
+
+def _preflight_artifact_paths(output_path: Path, action_log_path: Path) -> None:
+    """在构造客户端前验证两个演练产物路径可写，且不改写已有内容。"""
+
+    for artifact_path in (output_path, action_log_path):
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        if artifact_path.exists() and artifact_path.is_dir():
+            raise IsADirectoryError(f"artifact path is a directory: {artifact_path}")
+        with artifact_path.open("a", encoding="utf-8"):
+            pass
 
 
 def _refusal_summary(output_path: Path, action_log_path: Path) -> dict[str, Any]:
@@ -478,22 +518,33 @@ def main(
         LOGGER.error("refusing to create a rehearsal client without --rehearsal-confirmed")
         return 2
 
+    try:
+        _preflight_artifact_paths(args.output, args.log)
+    except (OSError, ValueError) as error:
+        LOGGER.error("artifact path preflight failed before client construction: %s", error)
+        return 2
+
     client = client_factory(
         args.base_url,
         args.robot_id,
         args.log,
         rehearsal_confirmed=True,
+        timeout_s=REQUEST_TIMEOUT_S,
     )
-    summary = run_rehearsal(
-        client=client,
-        output_path=args.output,
-        action_log_path=args.log,
-        command_summary={
-            "rehearsal_confirmed": True,
-            "output_filename": args.output.name,
-            "log_filename": args.log.name,
-        },
-    )
+    try:
+        summary = run_rehearsal(
+            client=client,
+            output_path=args.output,
+            action_log_path=args.log,
+            command_summary={
+                "rehearsal_confirmed": True,
+                "output_filename": args.output.name,
+                "log_filename": args.log.name,
+            },
+        )
+    except SummaryWriteError as error:
+        LOGGER.error("rehearsal finished but its summary was not persisted: %s", error)
+        return 1
     return 0 if summary["status"] == "completed" else 1
 
 

@@ -224,13 +224,13 @@ def test_no_signal_second_measure_and_failed_clear_keep_channels_unresolved(
     ("enter_response", "reason_fragment"),
     [
         (_accepted(virtual_time_s=1.0), "missing_or_invalid"),
-        (_accepted(remaining_real_duration_s=4.0, virtual_time_s=1.0), "safety_margin"),
+        (_accepted(remaining_real_duration_s=17.0, virtual_time_s=1.0), "safety_margin"),
     ],
 )
 def test_enter_remaining_duration_controls_deadline_without_assuming_1200_seconds(
     enter_response: dict[str, Any], reason_fragment: str
 ) -> None:
-    """缺失或小于五秒余量的 enter 响应必须阻止后续 measure。"""
+    """缺失或小于 17 秒安全余量的 enter 响应必须阻止后续 measure。"""
 
     output_path, log_path = _artifact_paths()
 
@@ -250,6 +250,123 @@ def test_enter_remaining_duration_controls_deadline_without_assuming_1200_second
     assert summary["status"] == "stopped"
     assert reason_fragment in summary["stop_reason"]
     assert [action[0] for action in client.actions] == ["enter", "exit"]
+
+
+@pytest.mark.parametrize("invalid_argument", ["--output", "--log"])
+def test_main_preflights_directory_artifact_path_before_constructing_client(
+    invalid_argument: str,
+) -> None:
+    """目录不能作为摘要或日志文件时，必须在构造客户端前拒绝。"""
+
+    output_path, log_path = _artifact_paths()
+    invalid_path = output_path.parent / f"problem-3-directory-{uuid4().hex}"
+    invalid_path.mkdir(parents=True)
+    existing_summary = "keep-existing-summary"
+    output_path.write_text(existing_summary, encoding="utf-8")
+    factory_calls: list[tuple[Any, ...]] = []
+
+    def factory(*args: Any, **kwargs: Any) -> FakeClient:
+        factory_calls.append((*args, kwargs))
+        return FakeClient()
+
+    result = runner.main(
+        [
+            "--robot-id",
+            "private-team-id",
+            "--rehearsal-confirmed",
+            "--output",
+            str(invalid_path if invalid_argument == "--output" else output_path),
+            "--log",
+            str(invalid_path if invalid_argument == "--log" else log_path),
+        ],
+        client_factory=factory,
+    )
+
+    assert result != 0
+    assert factory_calls == []
+    if invalid_argument == "--log":
+        assert output_path.read_text(encoding="utf-8") == existing_summary
+
+
+def test_main_uses_bounded_timeout_and_17_second_safety_margin() -> None:
+    """真实客户端构造须限制单请求时长，17 秒余量时不能开始 measure。"""
+
+    output_path, log_path = _artifact_paths()
+    captured_kwargs: dict[str, Any] = {}
+
+    def forbidden_measure(_position: tuple[float, float], _channel: int) -> dict[str, Any]:
+        raise AssertionError("17 秒余量不足时不得测量")
+
+    client = FakeClient(
+        enter_response=_accepted(remaining_real_duration_s=17.0, virtual_time_s=1.0),
+        measure_handler=forbidden_measure,
+    )
+
+    def factory(*_args: Any, **kwargs: Any) -> FakeClient:
+        captured_kwargs.update(kwargs)
+        return client
+
+    result = runner.main(
+        [
+            "--robot-id",
+            "private-team-id",
+            "--rehearsal-confirmed",
+            "--output",
+            str(output_path),
+            "--log",
+            str(log_path),
+        ],
+        client_factory=factory,
+    )
+
+    assert result == 1
+    assert runner.SAFETY_MARGIN_S == 17.0
+    assert captured_kwargs == {"rehearsal_confirmed": True, "timeout_s": 2.0}
+    assert [action[0] for action in client.actions] == ["enter", "exit"]
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+    assert summary["time_limit_policy"] == {
+        "request_timeout_s": 2.0,
+        "max_network_attempts_per_action": 3,
+        "safety_margin_s": 17.0,
+        "safety_margin_basis": "3*2s business retries + 3*2s exit retries + 5s reserve",
+    }
+
+
+def test_main_returns_nonzero_when_summary_write_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """摘要持久化失败不能被吞掉并错误报告成功退出码。"""
+
+    output_path, log_path = _artifact_paths()
+    client = FakeClient()
+    factory_calls: list[tuple[Any, ...]] = []
+
+    def factory(*args: Any, **kwargs: Any) -> FakeClient:
+        factory_calls.append((*args, kwargs))
+        return client
+
+    def fail_write(_path: Path, _summary: Mapping[str, Any]) -> None:
+        raise OSError("summary write denied")
+
+    monkeypatch.setattr(runner, "_write_summary", fail_write)
+
+    result = runner.main(
+        [
+            "--robot-id",
+            "private-team-id",
+            "--rehearsal-confirmed",
+            "--output",
+            str(output_path),
+            "--log",
+            str(log_path),
+        ],
+        client_factory=factory,
+    )
+
+    assert result != 0
+    assert len(factory_calls) == 1
+    assert client.actions[0] == ("enter",)
+    assert client.actions[-1] == ("exit",)
 
 
 @pytest.mark.parametrize(

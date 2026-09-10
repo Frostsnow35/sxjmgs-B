@@ -196,11 +196,14 @@ class RehearsalClient:
     ) -> None:
         """将一次 HTTP 尝试追加为一行 UTF-8 JSONL。"""
 
+        logged_payload = payload.copy()
+        if "robot_id" in logged_payload:
+            logged_payload["robot_id"] = "<redacted>"
         record = {
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "path": path,
             "attempt": attempt,
-            "payload": payload,
+            "payload": logged_payload,
             "http_status": http_status,
             "response": response,
             "exception": None
