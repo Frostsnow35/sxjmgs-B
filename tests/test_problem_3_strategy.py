@@ -156,6 +156,62 @@ def test_clearance_grid_has_no_axis_gap_larger_than_one_step() -> None:
 
 
 @pytest.mark.parametrize(
+    "bounds",
+    [
+        (-13.7, 4.2, 47.9, 83.6),
+        (float(2**56), float(2**56), float(2**56) + 32.0, float(2**56) + 32.0),
+        (5.0, -10.0, 5.0, 40.0),
+        (2.0, 3.0, 2.0, 3.0),
+    ],
+)
+def test_clearance_grid_axis_certificate_uses_actual_float_gaps(
+    bounds: tuple[float, float, float, float]
+) -> None:
+    """多类边界的实际浮点轴间隔应给出二维半径覆盖证书。"""
+
+    radius_m = 20.0
+    step = radius_m * math.sqrt(2.0)
+    candidates = clearance_grid(bounds, radius_m)
+    x_values = sorted({point[0] for point in candidates})
+    y_values = sorted({point[1] for point in candidates})
+
+    assert x_values[0] == bounds[0]
+    assert x_values[-1] == bounds[2]
+    assert y_values[0] == bounds[1]
+    assert y_values[-1] == bounds[3]
+    assert len(candidates) == len(x_values) * len(y_values)
+    assert all(right - left <= step for left, right in zip(x_values, x_values[1:]))
+    assert all(right - left <= step for left, right in zip(y_values, y_values[1:]))
+
+    x_cell_centers = [
+        left + (right - left) / 2.0 for left, right in zip(x_values, x_values[1:])
+    ] or [x_values[0]]
+    y_cell_centers = [
+        left + (right - left) / 2.0 for left, right in zip(y_values, y_values[1:])
+    ] or [y_values[0]]
+    assert all(
+        _nearest_distance((x, y), candidates) <= radius_m
+        for x in x_cell_centers
+        for y in y_cell_centers
+    )
+
+
+def test_clearance_grid_rejects_interval_without_representable_dense_points() -> None:
+    """当 ULP 大于所需步长且没有严格中点时，不能虚假宣称 20m 覆盖。"""
+
+    base = float(2**57)
+    with pytest.raises(ValueError, match="浮点"):
+        clearance_grid((base, base, base + 32.0, base + 32.0), 20.0)
+
+
+def test_clearance_grid_rejects_candidate_count_over_its_documented_limit() -> None:
+    """病态的大清除框超过显式候选上限时应快速拒绝，不能耗尽资源。"""
+
+    with pytest.raises(ValueError, match="候选"):
+        clearance_grid((0.0, 0.0, 10_000.0, 10_000.0), 20.0)
+
+
+@pytest.mark.parametrize(
     ("bounds", "samples"),
     [
         ((5.0, -10.0, 5.0, 40.0), ((5.0, -10.0), (5.0, 15.0), (5.0, 40.0))),

@@ -1,4 +1,9 @@
-"""问题三的纯几何保证策略，不执行网络或模拟器动作。"""
+"""问题三的纯几何保证策略，不执行网络或模拟器动作。
+
+清除兜底网格最多生成 ``MAX_CLEARANCE_CANDIDATES`` 个候选，以免病态边界
+耗尽资源；题设最大约 3600m 的方形清除框在 20m 半径下经实际间隔补点后为
+24336 个候选，低于此上限。
+"""
 
 from __future__ import annotations
 
@@ -7,6 +12,9 @@ from numbers import Real
 
 
 Point = tuple[float, float]
+
+# 单次清除兜底网格的明确资源上限，非高效策略的最优性声明。
+MAX_CLEARANCE_CANDIDATES = 100_000
 
 
 def _finite_real(value: float, name: str) -> float:
@@ -100,27 +108,57 @@ def _validated_bounds(bounds: tuple[float, float, float, float]) -> tuple[float,
     return checked_bounds
 
 
+def _ensure_candidate_limit(candidate_count: int) -> None:
+    """在构造候选前拒绝超过明确资源上限的网格。"""
+
+    if candidate_count > MAX_CLEARANCE_CANDIDATES:
+        raise ValueError(
+            f"清除兜底候选数量超过上限 {MAX_CLEARANCE_CANDIDATES}，拒绝生成"
+        )
+
+
 def _axis_grid(lower: float, upper: float, step: float) -> tuple[float, ...]:
-    """以端点补齐方式生成相邻间隔不超过步长的一维候选轴。"""
+    """端点补齐并按实际浮点间隔补点，生成可证明覆盖的一维候选轴。"""
 
     if lower == upper:
         return (lower,)
 
     full_steps = math.floor((upper - lower) / step)
-    values = [lower + index * step for index in range(full_steps + 1)]
+    _ensure_candidate_limit(full_steps + 2)
+    values = [lower]
+    for index in range(1, full_steps + 1):
+        candidate = lower + index * step
+        if candidate <= values[-1]:
+            continue
+        if candidate >= upper:
+            break
+        values.append(candidate)
     if values[-1] != upper:
         values.append(upper)
+
+    interval_index = 0
+    while interval_index < len(values) - 1:
+        left, right = values[interval_index], values[interval_index + 1]
+        if right - left <= step:
+            interval_index += 1
+            continue
+        midpoint = left + (right - left) / 2.0
+        if not left < midpoint < right:
+            raise ValueError("浮点分辨率不足，无法生成满足覆盖保证的清除候选")
+        values.insert(interval_index + 1, midpoint)
+        _ensure_candidate_limit(len(values))
     return tuple(values)
 
 
 def clearance_grid(
     bounds: tuple[float, float, float, float], radius_m: float = 20.0
 ) -> tuple[Point, ...]:
-    """生成覆盖边界的有限清除兜底候选网格，不声称其为高效策略。"""
+    """生成有数量上限且按实际浮点间隔覆盖边界的清除兜底候选网格。"""
 
     xmin, ymin, xmax, ymax = _validated_bounds(bounds)
     radius = _positive_finite(radius_m, "radius_m")
     step = radius * math.sqrt(2.0)
     x_values = _axis_grid(xmin, xmax, step)
     y_values = _axis_grid(ymin, ymax, step)
+    _ensure_candidate_limit(len(x_values) * len(y_values))
     return tuple((x, y) for x in x_values for y in y_values)
