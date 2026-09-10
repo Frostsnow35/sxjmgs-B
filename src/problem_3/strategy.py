@@ -8,13 +8,30 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 from numbers import Real
+from typing import TypeAlias
 
 
 Point = tuple[float, float]
+ObservationLike: TypeAlias = tuple[Point, float]
 
 # 单次清除兜底网格的明确资源上限，非高效策略的最优性声明。
 MAX_CLEARANCE_CANDIDATES = 100_000
+
+
+def pending_channels_after_scan(
+    observations: Mapping[int, Sequence[ObservationLike]], cleared_channels: set[int]
+) -> tuple[int, ...]:
+    """返回首次扫描后仍有至少一条示向度且尚未清除的频道。"""
+
+    return tuple(
+        sorted(
+            channel
+            for channel, channel_observations in observations.items()
+            if channel not in cleared_channels and channel_observations
+        )
+    )
 
 
 def _finite_real(value: float, name: str) -> float:
