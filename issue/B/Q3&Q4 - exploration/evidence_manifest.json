@@ -1,0 +1,657 @@
+{
+  "schema": "q3_q4_rehearsal_evidence_manifest",
+  "version": "1.1",
+  "scope": "official_simulator_practice_only_not_formal_test",
+  "pairing_rule": {
+    "key": "accepted_exit_wall_clock_to_result_ended_at_utc",
+    "tolerance_s": 5.0,
+    "identity_fields_excluded": [
+      "team_no",
+      "server_ticket",
+      "keys",
+      "case_code"
+    ]
+  },
+  "runs": [
+    {
+      "runner_mode": "q3",
+      "round": 1,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "3ddc70d1dddbabdf43d2c8392c81f003499c5f8cf43494b95d1a4ff15c46dc51",
+        "exit_time_utc": "2026-09-10T18:24:25.877688Z",
+        "accepted_enter": 1,
+        "accepted_measure": 167,
+        "accepted_clear": 15,
+        "clear_success": 15,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5131.601443
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 15,
+        "omnidirectional_jammer_count": 15,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "4e686692aa4cf2805123d0ed66458991064dd5329a8e6679e253854b974de3b8",
+        "paired_time_delta_s": 1.863312
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "c995d9c6c1d2cde660ccca3284fbe5560e369649d963914273b0c9160b464d76"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 2,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "d87a6ff8c8faabed76bdcf9d77730c0916bd19198058a4f5d75722e45b66f4f3",
+        "exit_time_utc": "2026-09-10T18:24:37.916605Z",
+        "accepted_enter": 1,
+        "accepted_measure": 171,
+        "accepted_clear": 14,
+        "clear_success": 14,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5091.088219
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 14,
+        "omnidirectional_jammer_count": 14,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "747c0407d01317a7977dc84e46b1c986c04857d7086ea6a9e8025fea8c1a8064",
+        "paired_time_delta_s": 1.865395
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "f1bca07ca98fc4ba3e04261136e32af7b193b71489707109d61ddde0cb60f6af"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 3,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "2435f79200a1e1dc3b78522a2a668e146602e6877ee275b016cc0847e61c22ca",
+        "exit_time_utc": "2026-09-10T18:24:59.084941Z",
+        "accepted_enter": 1,
+        "accepted_measure": 173,
+        "accepted_clear": 14,
+        "clear_success": 14,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5510.509151
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 14,
+        "omnidirectional_jammer_count": 14,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "2583fca39009c2f773686b3f35b4f4445c51851a3c4af39d02044b29cc9afb25",
+        "paired_time_delta_s": 1.788059
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "bf52270ee50a18f49517fc7dc2ff0050ea09af7671ef349f6e15d7298220d494"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 4,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "c0d4147d5c5fe64aca2ca877964ff0183b81ab282f35ac851d2f936b81d896ee",
+        "exit_time_utc": "2026-09-10T18:25:13.125984Z",
+        "accepted_enter": 1,
+        "accepted_measure": 166,
+        "accepted_clear": 10,
+        "clear_success": 10,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5204.045897
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 10,
+        "omnidirectional_jammer_count": 10,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "56a1fb45825feb053a7ff513c2dcf8ff484fbb8e9fe9e85a306894a8c5dd8190",
+        "paired_time_delta_s": 1.867016
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "c5cca62fb7e4487c6d7872bb36f015f209de82ca4095f3af3fc0af8536dc3ec7"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 5,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "5eff06237b4e4e3c1cc258ddab6fa5c3f788b0c4bad982ab7b3f51299aee3d6c",
+        "exit_time_utc": "2026-09-10T18:25:30.118964Z",
+        "accepted_enter": 1,
+        "accepted_measure": 169,
+        "accepted_clear": 12,
+        "clear_success": 12,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5552.951528
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 12,
+        "omnidirectional_jammer_count": 12,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "1ef7e98e56f19182f01e1aee6b0ef245f0ed2548552456a170d61e13523e7442",
+        "paired_time_delta_s": 1.817036
+      },
+      "jlog_in_archive": null
+    },
+    {
+      "runner_mode": "q3",
+      "round": 6,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "0c6cc25536029f1e15da438240aa34b126f8a66479bc218d1a762939d52ec8db",
+        "exit_time_utc": "2026-09-10T18:25:50.430182Z",
+        "accepted_enter": 1,
+        "accepted_measure": 159,
+        "accepted_clear": 10,
+        "clear_success": 10,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5425.423427
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 10,
+        "omnidirectional_jammer_count": 10,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "0306082d41d094462924896f8702166192c59759578707ff732ddef2071fa567",
+        "paired_time_delta_s": 1.865818
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "2d35a373876d5bada1043fae4c5b63c64520f61906ced1eb797daaeb27d9793e"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 7,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "acd044191f760677b96fd646470198ffa0704b9594d99e09faad6a97110fcd81",
+        "exit_time_utc": "2026-09-10T18:26:07.577068Z",
+        "accepted_enter": 1,
+        "accepted_measure": 163,
+        "accepted_clear": 12,
+        "clear_success": 12,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5042.449506
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 12,
+        "omnidirectional_jammer_count": 12,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "1f3b5808af8c772ee8109021888d957cbbd2837a78de1b5df16098da61e1fd5a",
+        "paired_time_delta_s": 1.797932
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "a3bbe4abd946bf585898d81c2169c5f022fd3f67ae7f5df47518fe326a032053"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 8,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "ab1189cd515af4097585db18e1887d23769e73d4e4198b51db3476e28abf9385",
+        "exit_time_utc": "2026-09-10T18:26:26.740716Z",
+        "accepted_enter": 1,
+        "accepted_measure": 171,
+        "accepted_clear": 15,
+        "clear_success": 15,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5500.312646
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 15,
+        "omnidirectional_jammer_count": 15,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "df5f01e01c6ed8af3fe0a877bb0e8954f6b82e004c104752e2d18a99db6fe473",
+        "paired_time_delta_s": 1.769284
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "0f474998184c1b3216ef283270f0a243850b525cbd468fc7b7dd3f3299f63b54"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 9,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "fd1e84f8c1ceec6038ab8b67cc277d714c46c16a14467e45eeec833e70cb4168",
+        "exit_time_utc": "2026-09-10T18:26:43.778773Z",
+        "accepted_enter": 1,
+        "accepted_measure": 171,
+        "accepted_clear": 16,
+        "clear_success": 16,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 6070.445175
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 16,
+        "omnidirectional_jammer_count": 16,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "d87db733f11602c2e932ad4540013e8f0f23bb5d7a4bc89286db2760b4b8fe57",
+        "paired_time_delta_s": 1.759227
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "25fd5c3d73ba076bca0185d8848dd8607201d1d29c7d2ee1d64368e644836c09"
+      }
+    },
+    {
+      "runner_mode": "q3",
+      "round": 10,
+      "classification": "canonical_q3",
+      "client": {
+        "sha256": "ff2f8ec8efeae212201148e26a4b1d6e3e8c1b3d67a1132ac20b25f8444686d2",
+        "exit_time_utc": "2026-09-10T18:27:10.759882Z",
+        "accepted_enter": 1,
+        "accepted_measure": 161,
+        "accepted_clear": 13,
+        "clear_success": 13,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 5226.892935
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 13,
+        "omnidirectional_jammer_count": 13,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "8fd0b694fca3c0cfd7ce5f0a79031a54d35dcdea66271a66e6f7f129c6f08ccf",
+        "paired_time_delta_s": 1.862118
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "d021b4bb9b634b6eec3ac8dca1ada49743fe55681e44088914026fd341e2e043"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 1,
+      "classification": "mode_mismatch",
+      "client": {
+        "sha256": "8db85e991487ba66208712f4c3ba7c62438b3c5039171d96ac7d719fa5eb48c3",
+        "exit_time_utc": "2026-09-10T18:27:29.995320Z",
+        "accepted_enter": 1,
+        "accepted_measure": 620,
+        "accepted_clear": 11,
+        "clear_success": 11,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11572.414633
+      },
+      "simulator_result": {
+        "problem_no": 3,
+        "jammer_count": 11,
+        "omnidirectional_jammer_count": 11,
+        "directional_jammer_count": 0,
+        "sidecar_sha256": "6aaf3b1a069b7f61c2968af3ebd8f1c557904f7937913b1c6060d3dc609ce162",
+        "paired_time_delta_s": 1.86168
+      },
+      "jlog_in_archive": {
+        "problem_no": 3,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "89c907722a3bf663e8dbea7ec26b71e9b85b6c36f90942ba29bf50909e8a507c"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 2,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "b809490122e7cefcb858b7dd132d6352674b43dbc88d9159ff95c71ad0f6d5d0",
+        "exit_time_utc": "2026-09-10T18:27:52.741792Z",
+        "accepted_enter": 1,
+        "accepted_measure": 624,
+        "accepted_clear": 17,
+        "clear_success": 14,
+        "clear_no_target_in_range": 3,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11721.762056
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 14,
+        "omnidirectional_jammer_count": 8,
+        "directional_jammer_count": 6,
+        "sidecar_sha256": "0297782b6af701b5704569eb2cce956aa179befc82979a43655b2dd45b59a1a1",
+        "paired_time_delta_s": 1.831208
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "4cc077deb8fff86565a90b62339131eee818107f53e3ff8c6869f077563b3b8a"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 3,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "cc8845e39c9d83a08b7d6767a8104ca8e2288d42b6452bf72b6646b49f00f1c0",
+        "exit_time_utc": "2026-09-10T18:28:16.897400Z",
+        "accepted_enter": 1,
+        "accepted_measure": 623,
+        "accepted_clear": 11,
+        "clear_success": 11,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11631.636499
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 11,
+        "omnidirectional_jammer_count": 6,
+        "directional_jammer_count": 5,
+        "sidecar_sha256": "10ac99c5e6860a61f9dac65f0d0df63b8f66d9bef299fea8b62c32102844a10d",
+        "paired_time_delta_s": 1.8676
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "7f96b777f87076bda754098f63ea72f39828cca3e3a0fe6dd5095504e8e9d100"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 4,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "2967bb6593030874ca39ff86da3e63242618ca3d5b5e4df5d43f05b96b457041",
+        "exit_time_utc": "2026-09-10T18:28:36.292485Z",
+        "accepted_enter": 1,
+        "accepted_measure": 620,
+        "accepted_clear": 10,
+        "clear_success": 10,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11542.800138
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 10,
+        "omnidirectional_jammer_count": 9,
+        "directional_jammer_count": 1,
+        "sidecar_sha256": "c5eb6105d69137d36e8234d4963e7c1d4d8df3f19433db80dfa03fcfd784ba96",
+        "paired_time_delta_s": 1.867515
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "9a90a81a50378a89b139c9423748cc7bdd391c44854d8d8d20cc80088b1be876"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 5,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "6f647bcfd69019b442f1fc5c8d81251fa15da095d791372a25fe6ceec35e85e0",
+        "exit_time_utc": "2026-09-10T18:32:18.446568Z",
+        "accepted_enter": 1,
+        "accepted_measure": 626,
+        "accepted_clear": 11,
+        "clear_success": 11,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11547.816113
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 11,
+        "omnidirectional_jammer_count": 2,
+        "directional_jammer_count": 9,
+        "sidecar_sha256": "1dd19a637709e5a5fddb6a56e0a4432842c1f32a41491a2d65bf53b806ef387c",
+        "paired_time_delta_s": 1.870432
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "57df656d0226417e7e6173880cca11447381f5b320b927f60ba53690cfe469c6"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 6,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "12288e6fe7b5c227d777790a38050a714f306278f506976cea98dfaba8e578ea",
+        "exit_time_utc": "2026-09-10T18:33:01.374221Z",
+        "accepted_enter": 1,
+        "accepted_measure": 620,
+        "accepted_clear": 13,
+        "clear_success": 13,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11759.234925
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 13,
+        "omnidirectional_jammer_count": 8,
+        "directional_jammer_count": 5,
+        "sidecar_sha256": "3343f8ca7e8b72bfa4f988d29f3588d6b34c07721f56d05e479051cf8307e885",
+        "paired_time_delta_s": 1.861779
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "9d901066a1c1bd0fe579e638672c0c1c7f183342c118761e6a6eff3be3501acf"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 7,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "fbf7d174bb2ab1133b5376e5d411c40263d74fe4ae215af39451a84002475640",
+        "exit_time_utc": "2026-09-10T18:33:26.083645Z",
+        "accepted_enter": 1,
+        "accepted_measure": 620,
+        "accepted_clear": 16,
+        "clear_success": 16,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 12467.12593
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 16,
+        "omnidirectional_jammer_count": 11,
+        "directional_jammer_count": 5,
+        "sidecar_sha256": "506ca6c49beb0c97e9e85bb6a183e063ef10f81b91d4bb513dfeceef776d1d2f",
+        "paired_time_delta_s": 1.868355
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "c726bf288c4b88aebe3457e8e3d81be9c0e22f71799da6205769399f06e87e45"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 8,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "98987be1781fd851292f92ac1691a4f211ea2b9d08b8510ef03bd70064e25c13",
+        "exit_time_utc": "2026-09-10T18:33:47.128031Z",
+        "accepted_enter": 1,
+        "accepted_measure": 628,
+        "accepted_clear": 15,
+        "clear_success": 15,
+        "clear_no_target_in_range": 0,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11911.893867
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 15,
+        "omnidirectional_jammer_count": 3,
+        "directional_jammer_count": 12,
+        "sidecar_sha256": "1bde22877282df44eb9a0b3853d98cdb63e5d4a24d6534b8f8a9c69a3b1fe735",
+        "paired_time_delta_s": 1.852969
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "ba6ce0ee95099cff2f2ac0b70ddfd673fd82f0a1d54db25356a4ef055f2ed273"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 9,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "258ddbe539eef2e442468aa7fdef3055760c7e87612fef682bc9526fd9685c81",
+        "exit_time_utc": "2026-09-10T18:35:44.765576Z",
+        "accepted_enter": 1,
+        "accepted_measure": 624,
+        "accepted_clear": 16,
+        "clear_success": 13,
+        "clear_no_target_in_range": 3,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 11472.163687
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 13,
+        "omnidirectional_jammer_count": 0,
+        "directional_jammer_count": 13,
+        "sidecar_sha256": "127b913f8c1ad35465c0e4c3d61bff1763d1c451d503b997f597e593e4723529",
+        "paired_time_delta_s": 1.872424
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "3bcf8d4ea8154906025bccd42de0f4e4f3b12b7712c262b3982f66ba84ccabc9"
+      }
+    },
+    {
+      "runner_mode": "q4",
+      "round": 10,
+      "classification": "canonical_q4",
+      "client": {
+        "sha256": "dcb4672698f6485c91230768c5acfe5c987b9c1706ccbd46c693541d19129b8e",
+        "exit_time_utc": "2026-09-10T18:36:09.507178Z",
+        "accepted_enter": 1,
+        "accepted_measure": 628,
+        "accepted_clear": 21,
+        "clear_success": 13,
+        "clear_no_target_in_range": 8,
+        "accepted_user_exit": 1,
+        "virtual_time_s": 12163.336227
+      },
+      "simulator_result": {
+        "problem_no": 4,
+        "jammer_count": 13,
+        "omnidirectional_jammer_count": 0,
+        "directional_jammer_count": 13,
+        "sidecar_sha256": "a9de21f0e0120fd2e2156af17c738a17d07201e8868c58146540c47a00ec3b30",
+        "paired_time_delta_s": 1.873822
+      },
+      "jlog_in_archive": {
+        "problem_no": 4,
+        "is_practice": true,
+        "formal_index_is_null": true,
+        "sha256": "13af6e1ed14d4e30deca0201801b053439373c671abbf88e110d92e520cca1fa"
+      }
+    }
+  ],
+  "aggregates": {
+    "q3": {
+      "runs": 10,
+      "simulator_sidecar_source_total": 131,
+      "client_clear_success_total": 131,
+      "paired_clear_success_to_source_ratio": 1.0,
+      "all_paired_runs_source_count_equals_client_success": true,
+      "accepted_measure_total": 1671,
+      "accepted_clear_total": 131,
+      "clear_no_target_in_range_total": 0,
+      "virtual_time_total_s": 53755.719927,
+      "virtual_time_mean_s": 5375.5719927,
+      "aggregate_full_process_time_per_source_s": 410.34900707633585,
+      "round_full_process_time_per_source_mean_s": 419.3419756911859,
+      "round_full_process_time_per_source_median_s": 397.83824190384615
+    },
+    "q4": {
+      "runs": 9,
+      "simulator_sidecar_source_total": 116,
+      "client_clear_success_total": 116,
+      "paired_clear_success_to_source_ratio": 1.0,
+      "all_paired_runs_source_count_equals_client_success": true,
+      "accepted_measure_total": 5613,
+      "accepted_clear_total": 130,
+      "clear_no_target_in_range_total": 14,
+      "virtual_time_total_s": 106217.769442,
+      "virtual_time_mean_s": 11801.974382444445,
+      "aggregate_full_process_time_per_source_s": 915.6704262241379,
+      "round_full_process_time_per_source_mean_s": 932.7516928811439,
+      "round_full_process_time_per_source_median_s": 904.5565326923078
+    },
+    "mode_mismatch_run_count": 1,
+    "archived_jlog_count": 19,
+    "canonical_q3_archived_jlog_count": 9,
+    "canonical_q4_archived_jlog_count": 9,
+    "mode_mismatch_archived_jlog_count": 1,
+    "archived_jlog_not_linked_to_a_client_run": 0
+  },
+  "interpretation": {
+    "q3": "Only canonical_q3 rows may support the paired Q3 rehearsal consistency check: simulator-side source counts versus client-side accepted clear successes.",
+    "q4": "Only canonical_q4 rows may support the paired Q4 rehearsal consistency check: simulator-side source counts versus client-side accepted clear successes.",
+    "mode_mismatch": "A runner filename or requested mode never overrides the simulator-result problem number.",
+    "evidence_boundary": "The manifest is a reproducible local pairing of simulator-side result summaries and client audit logs. It is not a formal-test certificate, and it does not make LocalEnv results or an unmatched JLOG part of the reported experiment.",
+    "raw_jlog": "Original JLOG files remain local supporting material and are not safe for public Git because their envelopes contain identity-related metadata."
+  }
+}

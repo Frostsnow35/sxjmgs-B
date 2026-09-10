@@ -50,36 +50,54 @@ class RehearsalClient:
         self._timeout_s = timeout_s
         self._request_counter = 0
         self._serial_lock = threading.Lock()
+        # 这些状态仅由已接受响应更新，供上层编排器计算下一步位置与频道。
+        # 它们不是模拟器真值的替代品，审计仍以响应 JSONL 为准。
+        self.pos: Point = (0.0, 0.0)
+        self.current_channel = 1
+        self.virtual_time_s = 0.0
 
     def enter(self) -> dict[str, Any]:
         """进入已获确认的演练。"""
 
-        return self._perform("enter", "/enter")
+        response = self._perform("enter", "/enter")
+        self.pos = (0.0, 0.0)
+        self.current_channel = 1
+        self.virtual_time_s = _accepted_virtual_time(response, self.virtual_time_s)
+        return response
 
     def measure(self, position: Point, channel: int) -> dict[str, Any]:
         """在 ``position`` 对指定频道执行一次测向。"""
 
-        return self._perform(
+        response = self._perform(
             "measure",
             "/measure",
             position={"x": position[0], "y": position[1]},
             channel=channel,
         )
+        self.pos = (float(position[0]), float(position[1]))
+        self.current_channel = int(channel)
+        self.virtual_time_s = _accepted_virtual_time(response, self.virtual_time_s)
+        return response
 
     def clear(self, position: Point, channel: int) -> dict[str, Any]:
         """在 ``position`` 对指定频道尝试清除。"""
 
-        return self._perform(
+        response = self._perform(
             "clear",
             "/clear",
             position={"x": position[0], "y": position[1]},
             channel=channel,
         )
+        self.pos = (float(position[0]), float(position[1]))
+        self.virtual_time_s = _accepted_virtual_time(response, self.virtual_time_s)
+        return response
 
     def exit(self) -> dict[str, Any]:
         """退出已获确认的演练。"""
 
-        return self._perform("exit", "/exit")
+        response = self._perform("exit", "/exit")
+        self.virtual_time_s = _accepted_virtual_time(response, self.virtual_time_s)
+        return response
 
     def _perform(self, action: str, path: str, **extra_fields: Any) -> dict[str, Any]:
         """在全局串行锁内构造一次动作并发送请求。"""
@@ -214,3 +232,16 @@ class RehearsalClient:
         with self._log_path.open("a", encoding="utf-8", newline="\n") as log_file:
             log_file.write(json.dumps(record, ensure_ascii=False, default=str))
             log_file.write("\n")
+
+
+def _accepted_virtual_time(response: dict[str, Any], fallback: float) -> float:
+    """从已验证的成功响应读取有限虚拟时刻，缺失时保留上一个状态。"""
+
+    value = response.get("virtual_time_s", fallback)
+    if isinstance(value, bool):
+        return fallback
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return fallback
+    return numeric_value if numeric_value >= 0.0 else fallback

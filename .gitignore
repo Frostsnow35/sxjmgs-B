@@ -30,6 +30,17 @@ emulator/Jammers-simulator/
 # Local rehearsal artifacts; canonical, reviewed summaries belong under output/results/.
 q3-solution/code/演练记录.csv
 
+# Raw simulator rehearsal evidence may contain encrypted envelopes or identity-related metadata.
+# Keep only the sanitized manifest, code and paper material in version control.
+issue/B/JLOG/
+issue/B/Q3&Q4 - exploration/robot_*.jsonl
+issue/B/Q3&Q4 - exploration/drill_batch*.jsonl
+issue/B/Q3&Q4 - exploration/drill_batch*.json
+issue/B/Q3&Q4 - exploration/*_console.*.log
+issue/B/Q3&Q4 - exploration/*.jlog
+# Extracted copies duplicate the task and interface documents already tracked under issue/B and emulator/.
+issue/B/Q3&Q4 - exploration/reference/
+
 # OS/editor files
 .DS_Store
 Thumbs.db
