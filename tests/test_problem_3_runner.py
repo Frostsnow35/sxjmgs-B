@@ -57,7 +57,9 @@ class FakeClient:
             )
         )
         self.clear_handler = clear_handler or (
-            lambda _position, _channel: _accepted(clear_result="failed", virtual_time_s=3.0)
+            lambda _position, _channel: _accepted(
+                clear_result="no_target_in_range", virtual_time_s=3.0
+            )
         )
         self.exit_response = exit_response or _accepted(virtual_time_s=99.0)
 
@@ -134,7 +136,9 @@ def test_runner_scans_all_points_remeasures_and_uses_closed_region_localization(
     client = FakeClient(
         measure_handler=measure,
         clear_handler=lambda position, channel: _accepted(
-            clear_result="success" if (position, channel) == ((10.0, 20.0), 7) else "failed",
+            clear_result="success"
+            if (position, channel) == ((10.0, 20.0), 7)
+            else "no_target_in_range",
             virtual_time_s=13.0,
         ),
     )
@@ -320,3 +324,33 @@ def test_invalid_measure_response_stops_and_exits_without_continuing() -> None:
     assert summary["status"] == "failed"
     assert "response_schema_error" in summary["stop_reason"]
     assert [action[0] for action in client.actions] == ["enter", "measure", "exit"]
+
+
+def test_unknown_clear_result_stops_after_near_and_exits_without_new_actions() -> None:
+    """非协议枚举的 clear_result 不能被当作普通清除失败后继续扫描。"""
+
+    output_path, log_path = _artifact_paths()
+
+    def measure(position: tuple[float, float], channel: int) -> dict[str, Any]:
+        if position == (0.0, 0.0) and channel == 1:
+            return _accepted(measure_result="near", virtual_time_s=2.0)
+        raise AssertionError("未知 clear_result 后不得开始新的 measure")
+
+    client = FakeClient(
+        measure_handler=measure,
+        clear_handler=lambda _position, _channel: _accepted(
+            clear_result="unexpected", virtual_time_s=3.0
+        ),
+    )
+
+    summary = runner.run_rehearsal(
+        client=client,
+        output_path=output_path,
+        action_log_path=log_path,
+        monotonic=lambda: 0.0,
+        command_summary={},
+    )
+
+    assert summary["status"] == "failed"
+    assert "response_schema_error" in summary["stop_reason"]
+    assert [action[0] for action in client.actions] == ["enter", "measure", "clear", "exit"]

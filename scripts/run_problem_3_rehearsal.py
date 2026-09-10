@@ -163,8 +163,10 @@ def run_rehearsal(
             return False
         clear_response = accept_response(client.clear(position, channel), "clear")
         clear_result = clear_response.get("clear_result")
-        if not isinstance(clear_result, str):
-            raise ResponseSchemaError("clear response must include string clear_result")
+        if clear_result not in {"success", "no_target_in_range"}:
+            raise ResponseSchemaError(
+                "clear response must include clear_result of success or no_target_in_range"
+            )
         if clear_result == "success":
             cleared_channels.add(channel)
             return True
