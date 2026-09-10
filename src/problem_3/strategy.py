@@ -1,8 +1,8 @@
 """问题三的纯几何保证策略，不执行网络或模拟器动作。
 
 清除兜底网格最多生成 ``MAX_CLEARANCE_CANDIDATES`` 个候选，以免病态边界
-耗尽资源；题设最大约 3600m 的方形清除框在 20m 半径下经实际间隔补点后为
-24336 个候选，低于此上限。
+耗尽资源；题设最大约 3600m 的方形清除框在默认端点均分网格和 20m 半径下为
+129×129，即 16641 个候选，低于此上限。
 """
 
 from __future__ import annotations
@@ -123,11 +123,18 @@ def _axis_grid(lower: float, upper: float, step: float) -> tuple[float, ...]:
     if lower == upper:
         return (lower,)
 
-    full_steps = math.floor((upper - lower) / step)
-    _ensure_candidate_limit(full_steps + 2)
+    span = upper - lower
+    if not math.isfinite(span):
+        _ensure_candidate_limit(MAX_CLEARANCE_CANDIDATES + 1)
+    maximum_span = step * (MAX_CLEARANCE_CANDIDATES - 1)
+    if math.isfinite(maximum_span) and span > maximum_span:
+        _ensure_candidate_limit(MAX_CLEARANCE_CANDIDATES + 1)
+
+    interval_count = max(1, math.ceil(span / step))
+    _ensure_candidate_limit(interval_count + 1)
     values = [lower]
-    for index in range(1, full_steps + 1):
-        candidate = lower + index * step
+    for index in range(1, interval_count):
+        candidate = lower + span * (index / interval_count)
         if candidate <= values[-1]:
             continue
         if candidate >= upper:

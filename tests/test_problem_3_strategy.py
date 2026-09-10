@@ -211,6 +211,19 @@ def test_clearance_grid_rejects_candidate_count_over_its_documented_limit() -> N
         clearance_grid((0.0, 0.0, 10_000.0, 10_000.0), 20.0)
 
 
+def test_clearance_grid_rejects_finite_bounds_with_overflowing_span_by_limit() -> None:
+    """有限端点相减溢出时也要走候选上限的 ValueError 路径。"""
+
+    with pytest.raises(ValueError, match="候选|上限"):
+        clearance_grid((-1e308, 0.0, 1e308, 1.0), 20.0)
+
+
+def test_clearance_grid_uses_129_square_points_for_default_3600m_box() -> None:
+    """题设 3600m 方形在默认 20m 半径下应保持 129×129 个基础候选。"""
+
+    assert len(clearance_grid((-1800.0, -1800.0, 1800.0, 1800.0))) == 129**2
+
+
 @pytest.mark.parametrize(
     ("bounds", "samples"),
     [
