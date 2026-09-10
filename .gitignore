@@ -1,0 +1,36 @@
+# Python/cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local planning/rendering/runtime artifacts
+tmp/
+logs/
+.pnpm-store/
+tools/**/node_modules/
+tools/**/.cache/
+.codex/
+.agents/
+
+# Simulator runtime state and binaries (keep documentation under emulator/)
+emulator/**/JammersSimulatorData/*.sqlite3
+emulator/**/JammersSimulatorData/*.sqlite3-*
+emulator/**/JammersSimulatorData/*.log
+emulator/**/*.exe
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets/local credentials
+.env
+.env.*
+!.env.example
+*credentials*
+*secret*

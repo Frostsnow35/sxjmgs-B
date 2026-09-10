@@ -1,0 +1,33 @@
+{
+  "contest": "2026 CUMCM",
+  "problem": "B 无线电干扰源的快速自动定位与清除",
+  "mode": "manual_checkpoint",
+  "current_gate": "G1_docs_verified_ready_for_question_1_2_approval",
+  "date": "2026-09-10",
+  "files_received": [
+    "issue/B/B题.pdf",
+    "issue/B/附件/1.docx",
+    "issue/B/附件/2.docx",
+    "emulator/emulator docs(essential)/Instructions.docx",
+    "emulator/emulator docs(essential)/Simulator Communication Interface Specification and Programming Guide.docx"
+  ],
+  "user_decisions": [
+    "已选择 B 题。",
+    "开始问题 1 的正式求解前必须等待用户批准。",
+    "问题 1–2 文档与接口核验已完成，但尚未开始求解。",
+    "未得到用户当次明确批准，禁止开始问题 4 的正式测试。"
+  ],
+  "simulator_policy": {
+    "current_status": "no_simulator_calls_authorized",
+    "question_3_formal_test": "requires_explicit_user_approval_after_rehearsal_evidence",
+    "question_4_formal_test": "requires_explicit_user_approval_each_start; never_trigger_implicitly",
+    "formal_attempts_per_question": 3,
+    "abort_consumes_attempt": true
+  },
+  "frozen_results": [],
+  "stale_downstream_artifacts": [],
+  "open_risks": [
+    "DOCX packaged renderer cannot find bundled LibreOffice in the current runtime.",
+    "Question 1 requires explicit handling of empty, degenerate, and unbounded feasible regions."
+  ]
+}
