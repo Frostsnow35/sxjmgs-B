@@ -32,6 +32,12 @@
       "scope": "offline constructed validation cases only; not simulator or final-instance results",
       "command": "python scripts/run_problem_1_2.py --output output/results/problem_1_2_validation.json",
       "test_command": "python -m pytest -p no:cacheprovider tests -q"
+    },
+    {
+      "path": "output/results/problem_3/baseline_teammate_17point_20260910.csv",
+      "scope": "one Question 3 rehearsal using the teammate 17-point test script; measures cleared/found channels only, not the simulator-reported source-total clearance ratio",
+      "command": "python test_run.py (workdir: q3-solution/code; only after user-confirmed Question 3 rehearsal interface readiness)",
+      "test_command": "not applicable: original teammate script has no automated test suite"
     }
   ],
   "stale_downstream_artifacts": [],

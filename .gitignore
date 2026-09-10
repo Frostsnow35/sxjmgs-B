@@ -10,6 +10,7 @@ venv/
 # Local planning/rendering/runtime artifacts
 tmp/
 logs/
+.worktrees/
 .pnpm-store/
 tools/
 tools/**/node_modules/
@@ -22,6 +23,10 @@ emulator/**/JammersSimulatorData/*.sqlite3
 emulator/**/JammersSimulatorData/*.sqlite3-*
 emulator/**/JammersSimulatorData/*.log
 emulator/**/*.exe
+emulator/Jammers-simulator/
+
+# Local rehearsal artifacts; canonical, reviewed summaries belong under output/results/.
+q3-solution/code/演练记录.csv
 
 # OS/editor files
 .DS_Store
