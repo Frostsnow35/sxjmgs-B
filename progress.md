@@ -29,3 +29,11 @@
 - 验证中依次排除三项运行时装配问题：Playwright 未下载自带 Chromium（改用本机 Edge）、`docx-preview` 浏览器构建需先注入全局 JSZip、pnpm 将 JSZip 放入虚拟依赖目录。上述问题均已通过本地已有组件解决，未下载浏览器、未启动或调用模拟器。
 - 最后一次 `pnpm list` 在受限环境下因其 store 索引 SQLite 无法打开而失败；未重复。依赖清单、锁文件、实际 JS 文件和真实渲染截图均通过文件存在性核验，且此前实际渲染已成功。
 - 重新渲染两份模拟器 DOCX，并分别检查顶部、中段、末段截图；内容、表格、代码和关键接口规则可读，无关键缺页或乱码。问题 1–2 的文档核验与开题准备现已完成，仍未开始求解。
+
+## 2026-09-10（问题一、二离线求解启动）
+
+- 用户已明确批准开始问题一、二求解；将继续保持模拟器零调用，问题三、四正式测试门禁不变。
+- 使用 `math-modeling-contest`、`cumcm-b-optimization`、`planning-with-files-zh`、`writing-plans` 与 TDD 工作流，新增问题一、二模型合同与实施计划；下一步先写几何模块的失败测试。
+- 新增 `src/localization_geometry.py`：实现闭角域半平面交、无界/退化分类、凸包直径、直径圆覆盖判定、问题二的交会角评分、严格候选核和 $U_1$ 有限网格采样。
+- TDD 记录：先验证模块和脚本导入失败，再完成最小实现；当前 `python -m pytest -p no:cacheprovider tests -q` 为 12 通过。脚本直接运行一度因 `scripts/` 未包含仓库根目录而无法导入 `src`，已添加受测的根目录路径装配并验证通过。
+- 运行 `python scripts/run_problem_1_2.py --output output/results/problem_1_2_validation.json`，生成仅含构造离线案例的结构化证据；未调用模拟器。完成 200/100/50 m 网格加密：软排序最优点保持为 $(800,-1600)$ m 但不保证接收，严格核最优候选收敛在 $(750\text{–}800,-650\text{–}-800)$ m 的侧向区域。

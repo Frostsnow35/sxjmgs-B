@@ -2,7 +2,7 @@
   "contest": "2026 CUMCM",
   "problem": "B 无线电干扰源的快速自动定位与清除",
   "mode": "manual_checkpoint",
-  "current_gate": "G1_docs_verified_ready_for_question_1_2_approval",
+  "current_gate": "G3_question_1_2_offline_baseline_verified",
   "date": "2026-09-10",
   "files_received": [
     "issue/B/B题.pdf",
@@ -15,7 +15,8 @@
     "已选择 B 题。",
     "开始问题 1 的正式求解前必须等待用户批准。",
     "问题 1–2 文档与接口核验已完成，但尚未开始求解。",
-    "未得到用户当次明确批准，禁止开始问题 4 的正式测试。"
+    "未得到用户当次明确批准，禁止开始问题 4 的正式测试。",
+    "2026-09-10：用户明确批准开始问题一和问题二的离线正式求解；模拟器仍不得调用。"
   ],
   "simulator_policy": {
     "current_status": "no_simulator_calls_authorized",
@@ -24,10 +25,19 @@
     "formal_attempts_per_question": 3,
     "abort_consumes_attempt": true
   },
-  "frozen_results": [],
+  "frozen_results": [
+    {
+      "path": "output/results/problem_1_2_validation.json",
+      "scope": "offline constructed validation cases only; not simulator or final-instance results",
+      "command": "python scripts/run_problem_1_2.py --output output/results/problem_1_2_validation.json",
+      "test_command": "python -m pytest -p no:cacheprovider tests -q"
+    }
+  ],
   "stale_downstream_artifacts": [],
   "open_risks": [
     "DOCX packaged renderer cannot find bundled LibreOffice in the current runtime.",
-    "Question 1 requires explicit handling of empty, degenerate, and unbounded feasible regions."
+    "Question 1 requires explicit handling of empty, degenerate, and unbounded feasible regions.",
+    "Question 2 grid samples are finite proxies for U_1; grid-refinement evidence is still required before freezing a decision recommendation.",
+    "Pytest cache writes can leave unreadable temporary directories in the project root; use the recorded scoped test command."
   ]
 }
