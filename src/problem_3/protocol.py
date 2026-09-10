@@ -103,7 +103,7 @@ class RehearsalClient:
     def _require_rehearsal_confirmation(self) -> None:
         """阻止未显式确认演练的所有协议动作。"""
 
-        if not self._rehearsal_confirmed:
+        if self._rehearsal_confirmed is not True:
             raise SimulatorProtocolError(
                 "rehearsal confirmation is required before simulator requests"
             )
@@ -136,16 +136,27 @@ class RehearsalClient:
 
             http_status = response.status_code
             if not 200 <= http_status < 300:
-                error = SimulatorProtocolError(f"HTTP {http_status} for {path}")
-                self._write_log(
-                    path=path,
-                    payload=payload,
-                    attempt=attempt,
-                    http_status=http_status,
-                    response=None,
-                    exception=error,
-                )
-                raise error
+                try:
+                    error_body = response.json()
+                except Exception as error:
+                    self._write_log(
+                        path=path,
+                        payload=payload,
+                        attempt=attempt,
+                        http_status=http_status,
+                        response=None,
+                        exception=error,
+                    )
+                else:
+                    self._write_log(
+                        path=path,
+                        payload=payload,
+                        attempt=attempt,
+                        http_status=http_status,
+                        response=error_body,
+                        exception=None,
+                    )
+                raise SimulatorProtocolError(f"HTTP {http_status}")
             try:
                 data = response.json()
             except Exception as error:

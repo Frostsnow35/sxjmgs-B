@@ -118,6 +118,28 @@ def test_client_refuses_every_action_without_rehearsal_confirmation(
     assert session.calls == []
 
 
+@pytest.mark.parametrize("confirmation", ["false", 1, [], object()])
+@pytest.mark.parametrize(
+    ("action", "arguments"),
+    [
+        ("enter", ()),
+        ("measure", ((10.0, -2.0), 3)),
+        ("clear", ((10.0, -2.0), 3)),
+        ("exit", ()),
+    ],
+)
+def test_client_requires_identity_true_for_every_action(
+    confirmation: Any, action: str, arguments: tuple[Any, ...]
+) -> None:
+    session = FakeSession([])
+    client = make_client(new_log_path(), session, rehearsal_confirmed=confirmation)
+
+    with pytest.raises(SimulatorProtocolError, match="rehearsal"):
+        getattr(client, action)(*arguments)
+
+    assert session.calls == []
+
+
 @pytest.mark.parametrize(
     ("action", "arguments"),
     [
@@ -150,31 +172,33 @@ def test_client_rejects_http_error_even_when_body_claims_accepted() -> None:
     session = FakeSession([response])
     client = make_client(log_path, session)
 
-    with pytest.raises(SimulatorProtocolError, match="HTTP 500"):
+    with pytest.raises(SimulatorProtocolError, match=r"^HTTP 500$"):
         client.enter()
 
     record = json.loads(log_path.read_text(encoding="utf-8"))
     assert record["path"] == "/enter"
     assert record["http_status"] == 500
     assert record["payload"]["robot_id"] == "team"
-    assert record["response"] is None
-    assert response.json_calls == 0
+    assert record["response"] == {"accepted": True}
+    assert record["exception"] is None
+    assert response.json_calls == 1
 
 
-def test_client_rejects_http_error_without_parsing_an_invalid_body() -> None:
+def test_client_rejects_http_error_and_persists_invalid_body_parse_failure() -> None:
     log_path = new_log_path()
     response = FakeResponse(500, ValueError("must not parse HTTP error body"))
     session = FakeSession([response])
     client = make_client(log_path, session)
 
-    with pytest.raises(SimulatorProtocolError, match="HTTP 500"):
+    with pytest.raises(SimulatorProtocolError, match=r"^HTTP 500$"):
         client.enter()
 
     record = json.loads(log_path.read_text(encoding="utf-8"))
-    assert response.json_calls == 0
+    assert response.json_calls == 1
     assert record["http_status"] == 500
     assert record["payload"]["request_id"] == "enter-1"
     assert record["response"] is None
+    assert record["exception"] == "ValueError: must not parse HTTP error body"
 
 
 @pytest.mark.parametrize("accepted", [False, None, "true", 1])
