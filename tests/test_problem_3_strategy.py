@@ -41,6 +41,17 @@ def test_initial_scan_points_reject_non_positive_or_non_finite_radius(radius_m: 
         initial_scan_points(radius_m)
 
 
+def test_public_geometry_functions_normalize_huge_integer_overflow_to_value_error() -> None:
+    """超大整数在半径和边界路径中均应统一为 ValueError，而非泄漏转换溢出。"""
+
+    huge_integer = 10**1000
+
+    with pytest.raises(ValueError):
+        initial_scan_points(huge_integer)
+    with pytest.raises(ValueError):
+        clearance_grid((0.0, 0.0, huge_integer, 1.0))
+
+
 def test_worst_initial_scan_distance_uses_stated_hexagon_bound() -> None:
     """首次扫描的覆盖上界应直接等于题设给出的余弦公式。"""
 
@@ -52,6 +63,12 @@ def test_worst_initial_scan_distance_uses_stated_hexagon_bound() -> None:
     assert distance == pytest.approx(expected)
     assert distance == pytest.approx(968.9016, abs=1e-4)
     assert distance < 1000.0
+
+
+def test_worst_initial_scan_distance_stays_finite_for_equal_huge_radii() -> None:
+    """等大的极大有限半径不应因 inf-inf 消去而产生 NaN。"""
+
+    assert math.isfinite(worst_initial_scan_distance(1e308, 1e308))
 
 
 @pytest.mark.parametrize(
@@ -194,6 +211,24 @@ def test_clearance_grid_axis_certificate_uses_actual_float_gaps(
         for x in x_cell_centers
         for y in y_cell_centers
     )
+
+
+def test_clearance_grid_refines_multiple_large_coordinate_gaps_in_order() -> None:
+    """大坐标下多个 32m 实际 gap 经分段扫描后应保留 9×9 个有序候选。"""
+
+    base = float(2**56)
+    radius_m = 20.0
+    step = radius_m * math.sqrt(2.0)
+    candidates = clearance_grid((base, base, base + 128.0, base + 128.0), radius_m)
+    x_values = sorted({point[0] for point in candidates})
+    y_values = sorted({point[1] for point in candidates})
+
+    assert len(candidates) == 81
+    assert len(x_values) == len(y_values) == 9
+    assert [right - left for left, right in zip(x_values, x_values[1:])] == [16.0] * 8
+    assert [right - left for left, right in zip(y_values, y_values[1:])] == [16.0] * 8
+    assert all(right - left <= step for left, right in zip(x_values, x_values[1:]))
+    assert all(right - left <= step for left, right in zip(y_values, y_values[1:]))
 
 
 def test_clearance_grid_rejects_interval_without_representable_dense_points() -> None:

@@ -20,9 +20,15 @@ MAX_CLEARANCE_CANDIDATES = 100_000
 def _finite_real(value: float, name: str) -> float:
     """校验并返回一个有限实数。"""
 
-    if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
+    if isinstance(value, bool) or not isinstance(value, Real):
         raise ValueError(f"{name} 必须是有限实数")
-    return float(value)
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(f"{name} 必须是有限实数") from error
+    if not math.isfinite(numeric_value):
+        raise ValueError(f"{name} 必须是有限实数")
+    return numeric_value
 
 
 def _positive_finite(value: float, name: str) -> float:
@@ -62,10 +68,9 @@ def worst_initial_scan_distance(
 
     target_radius = _positive_finite(target_radius_m, "target_radius_m")
     scan_radius = _positive_finite(scan_radius_m, "scan_radius_m")
-    return math.sqrt(
-        target_radius**2
-        + scan_radius**2
-        - 2.0 * target_radius * scan_radius * math.cos(math.pi / 6.0)
+    return math.hypot(
+        target_radius - scan_radius * math.cos(math.pi / 6.0),
+        scan_radius * math.sin(math.pi / 6.0),
     )
 
 
@@ -118,7 +123,7 @@ def _ensure_candidate_limit(candidate_count: int) -> None:
 
 
 def _axis_grid(lower: float, upper: float, step: float) -> tuple[float, ...]:
-    """端点补齐并按实际浮点间隔补点，生成可证明覆盖的一维候选轴。"""
+    """以分段栈补齐实际浮点间隔，顺序生成可证明覆盖的一维候选轴。"""
 
     if lower == upper:
         return (lower,)
@@ -143,18 +148,25 @@ def _axis_grid(lower: float, upper: float, step: float) -> tuple[float, ...]:
     if values[-1] != upper:
         values.append(upper)
 
-    interval_index = 0
-    while interval_index < len(values) - 1:
-        left, right = values[interval_index], values[interval_index + 1]
+    pending_segments = [
+        (values[index], values[index + 1])
+        for index in range(len(values) - 2, -1, -1)
+    ]
+    refined_values = [values[0]]
+    segment_count = len(pending_segments)
+    while pending_segments:
+        left, right = pending_segments.pop()
         if right - left <= step:
-            interval_index += 1
+            refined_values.append(right)
             continue
         midpoint = left + (right - left) / 2.0
         if not left < midpoint < right:
             raise ValueError("浮点分辨率不足，无法生成满足覆盖保证的清除候选")
-        values.insert(interval_index + 1, midpoint)
-        _ensure_candidate_limit(len(values))
-    return tuple(values)
+        segment_count += 1
+        _ensure_candidate_limit(segment_count + 1)
+        pending_segments.append((midpoint, right))
+        pending_segments.append((left, midpoint))
+    return tuple(refined_values)
 
 
 def clearance_grid(
