@@ -36,7 +36,7 @@ class RehearsalClient:
         base_url: str,
         robot_id: str,
         log_path: Path,
-        rehearsal_confirmed: bool,
+        rehearsal_confirmed: bool = False,
         session: requests.Session | Any | None = None,
         timeout_s: float = 10.0,
     ) -> None:
@@ -135,6 +135,17 @@ class RehearsalClient:
                 continue
 
             http_status = response.status_code
+            if not 200 <= http_status < 300:
+                error = SimulatorProtocolError(f"HTTP {http_status} for {path}")
+                self._write_log(
+                    path=path,
+                    payload=payload,
+                    attempt=attempt,
+                    http_status=http_status,
+                    response=None,
+                    exception=error,
+                )
+                raise error
             try:
                 data = response.json()
             except Exception as error:
@@ -146,8 +157,6 @@ class RehearsalClient:
                     response=None,
                     exception=error,
                 )
-                if not 200 <= http_status < 300:
-                    raise SimulatorProtocolError(f"HTTP {http_status} for {path}") from error
                 raise SimulatorProtocolError(f"invalid JSON response for {path}: {error}") from error
 
             self._write_log(
@@ -158,8 +167,6 @@ class RehearsalClient:
                 response=data,
                 exception=None,
             )
-            if not 200 <= http_status < 300:
-                raise SimulatorProtocolError(f"HTTP {http_status} for {path}")
             if not isinstance(data, dict) or data.get("accepted") is not True:
                 raise SimulatorProtocolError(f"response for {path} does not set accepted to true")
             return data
