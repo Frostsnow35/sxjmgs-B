@@ -2,7 +2,7 @@
 
 > 更新日期：2026-09-11
 >
-> 状态：**已完成：入口实现与离线 FakeClient 测试；需要验证：后续人工确认后的实际模拟演练。**
+> 状态：**已完成：入口实现、离线 FakeClient 测试与一次操作者确认的模拟演练证据归档；需要验证：后续另行授权的正式测试。**
 > 影响范围：`scripts/run_problem_3_rehearsal.py`、`src/problem_3/strategy.py` 的待处理频道纯函数、问题三演练摘要；不修改问题一闭角域或协议层语义。
 
 ## Why
@@ -25,7 +25,7 @@
 | 问题一 | 每个频道的全部 `direction` 被转成 `(x, y, bearing_deg)`，调用 `locate_from_bearings(error_deg=1, target_radius_m=1800)`；运行器不以 LS 替代该闭角域交集。 |
 | 问题二 | 单条首测方向以 `S'=S+750u(θ)+600v(θ)` 调用 `guaranteed_second_point`，随后才定位。 |
 | 问题三 | 只有 `/clear` 的 `clear_result == "success"` 才进入 `cleared_channels`；`no_signal`、清除失败和候选耗尽均保留未完成频道。 |
-| 协议与日志 | `RehearsalClient` 负责 JSONL 请求--响应日志；本地日志中的 `robot_id` 固定为 `<redacted>`，不含队号、接口密钥或 UI 测试码；实际 HTTP payload 仍携带队号以满足协议。Runner 只引用日志路径并写脱敏汇总。 |
+| 协议与日志 | `RehearsalClient` 负责 JSONL 请求--响应日志；本地日志中的 `robot_id` 固定为 `<redacted>`，不含队号、接口密钥或 UI 测试码；实际 HTTP payload 仍携带队号以满足协议。Runner 只引用日志路径并写脱敏汇总，绝不把操作者 UI 读数写入自动摘要。 |
 | 正式测试 | 本入口不判断 UI 模式、不开启也不模拟正式测试。正式测试必须在当次另获用户明确授权并冻结版本。 |
 
 ## 输入、输出与运行边界
@@ -48,7 +48,7 @@
 
 摘要 JSON 至少包含 `schema/version`、`run_mode="rehearsal"`、`status`、`stop_reason`、已清除/未完成/已发现频道、`reported_total_sources: null`、最后已接受响应的 `virtual_time_s`、enter 响应的 `remaining_real_duration_s`、日志路径、实际与配置扫描点数、每频道观测数、定位状态、脱敏命令参数和配置哈希。
 
-`reported_total_sources` 恒为 `null`，等待操作者从 UI 获取并另行报告；频道数不是源总数。
+`reported_total_sources` 恒为 `null`；频道数不是源总数。操作者从 UI 获得的总数必须另存独立证据 JSON，标明 `source="operator_manual_ui"`、非正式测试范围及其关联的摘要文件，Runner 不计算、也不写回该值。
 
 ## 模型与编排口径
 
@@ -96,12 +96,14 @@ $$S'=S+750u(\theta)+600v(\theta),$$
 7. WHEN 协议抛出 `SimulatorProtocolError` 或响应缺少约定字段，THEN Runner SHALL 停止后续动作，写失败摘要；已成功 enter 时 SHALL 尽力 `/exit` 一次，而首次 enter 失败时 SHALL 不调用 `/exit`。
 8. WHEN 未传 `--rehearsal-confirmed` 或调用 `--help`，THEN Runner SHALL 不构建真实客户端、不发送 HTTP 请求；未确认摘要 SHALL 不含 robot ID。
 9. WHEN `--output` 或 `--log` 是目录或不可写，THEN 主入口 SHALL 在构造客户端前返回非零；预检不得改写已有摘要。WHEN 汇总写入，THEN 它 SHALL 为 UTF-8 JSON、创建父目录、将发现频道与 `reported_total_sources=null` 分开，并提供可复算的配置哈希；写入失败 SHALL 返回非零。
+10. WHEN 操作者人工提供模拟演练 UI 总源数，THEN 该值 SHALL 写入与 Runner 摘要分离的 UTF-8 证据 JSON，记录人工来源、模拟演练范围和关联摘要文件；Runner 摘要的 `reported_total_sources` SHALL 保持 `null`。
 
 ## 验证状态与局限
 
 - 已完成：离线 FakeClient 测试验证七点扫描、立即清除、单方向复测、闭角域参数、失败频道保留、完整方框回退、真实时限门禁、帮助页和摘要脱敏。
 - 已完成：策略网格已有离线几何测试，验证 $20\ \mathrm{m}$ 覆盖条件和 `100000` 候选保护。
-- 需要验证：实际模拟演练只能在后续人工确认 UI 状态与授权后执行；本次未发送 HTTP、没有任何演练数值结果可报告。
+- 已完成：2026-09-11 在操作者确认的模拟演练中，自动摘要记录 12 discovered、12 cleared、0 unresolved 和 5989.83057 虚拟秒，且 `reported_total_sources=null`；独立 UI 证据记录用户人工提供的总数 12、全向 12、定向 0。两类证据一致支持本次模拟演练清除全部 12 个全向源，但不是正式测试结果。
+- 需要验证：任何正式测试只能在后续另行获得用户授权并再次确认 UI 模式后执行；不得由本次模拟演练推定正式测试表现。
 - 局限：全局回退网格可能消耗大量真实时间；它不能被表述为高效搜索。若频繁触发，应在保持保证口径的前提下改进复测或增加经验证观测，且同步更新本合同与技术文档。
 
 ## REMOVED / Migration

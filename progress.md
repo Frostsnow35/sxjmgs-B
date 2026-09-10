@@ -57,6 +57,6 @@
 ## 2026-09-11（问题三模拟演练证据归档）
 
 - **已完成：** 仅在操作者手动确认 UI 为“问题三—模拟演练”后，归档成功摘要 `output/results/problem_3/20260911_rehearsal_attempt2_summary.json`。摘要记录状态 `completed`、12 discovered、12 cleared、0 unresolved 与 5989.83057 虚拟秒；这是模拟演练，不是正式测试。
-- **已完成：** 用户 UI 人工回填为总数 12、全向 12、定向 0，并写入摘要的 `reported_total_sources`；该界面读数与摘要中的发现/清除计数一致。动作明细 `logs/problem_3/20260911_rehearsal_attempt2_actions.jsonl` 保持本地忽略，不提交。
+- **已完成：** Runner 自动摘要的 `reported_total_sources` 保持 `null`；独立 UI 证据 `output/results/problem_3/20260911_rehearsal_attempt2_ui_evidence.json` 记录用户人工提供的总数 12、全向 12、定向 0。该人工读数与自动摘要的发现/清除计数一致，支持本次模拟演练清除全部 12 个全向源；动作明细 `logs/problem_3/20260911_rehearsal_attempt2_actions.jsonl` 保持本地忽略，不提交。
 - **影响范围：** 仅整理问题三的成功演练结果、Git 忽略规则、缓存索引和协作文档；不改变数学模型、接口实现、队友原始脚本或 DOCX，也不触发任何模拟器/HTTP 动作。
-- **需要验证：** 7 点覆盖、闭角域定位与协议重试规则仍须在其假设和 `accepted` 响应下核验；用户提供的 UI 回填应保留其人工来源。若需问题三正式测试，必须由用户在后续单独授权并由操作者再次确认 UI 模式。
+- **需要验证：** 7 点覆盖、闭角域定位与协议重试规则仍须在其假设和 `accepted` 响应下核验；用户提供的 UI 读数应保留为独立人工来源，不能写入 Runner 自动摘要。若需问题三正式测试，必须由用户在后续单独授权并由操作者再次确认 UI 模式。

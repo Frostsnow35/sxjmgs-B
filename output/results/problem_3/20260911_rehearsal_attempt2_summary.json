@@ -64,7 +64,7 @@
     "7": 3
   },
   "remaining_real_duration_s": 1200.0,
-  "reported_total_sources": 12,
+  "reported_total_sources": null,
   "run_mode": "rehearsal",
   "scan_point_count": 7,
   "schema": "problem_3_rehearsal_summary",
