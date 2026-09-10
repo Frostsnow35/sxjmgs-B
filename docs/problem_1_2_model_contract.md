@@ -48,11 +48,11 @@ C_i=\left\{x:\operatorname{cross}\big(u(\theta_i-\varepsilon),x-S_i\big)\ge0,\qu
 \operatorname{cross}\big(x-S_i,u(\theta_i+\varepsilon)\big)\ge0\right\}.
 $$
 
-定位区域为 $P=\cap_i C_i$。当 $P$ 非空且有界时，它是凸多边形；由各边界直线的两两交点中满足所有约束的点构成顶点候选，再取凸包。其直径为
+题设圆域不可省略，定位区域为 $P=\Omega\cap\cap_i C_i$，其中 $\Omega=B((0,0),1800)$。若圆域边界未激活，$P$ 是凸多边形；若圆域边界激活，$P$ 是含圆弧的紧凸集，而非用外接正方形替代的多边形。线界交点、线圆交点及可行圆弧上的对径候选共同参与直径计算。
 
 $$D(P)=\max_{p,q\in V(P)}\|p-q\|_2.$$
 
-输出必须区分 `empty`、`unbounded`、`point`、`segment` 与 `polygon`。对有界集合，遍历全部达到直径的顶点对 $(p,q)$，令圆心 $c=(p+q)/2$、半径 $D/2$；若任一圆使所有顶点到 $c$ 的距离不大于 $D/2$，则该直径圆覆盖 $P$。
+输出必须区分 `empty`、`unbounded`、`point`、`segment`、`polygon` 与 `disk_clipped`。`unbounded` 仅用于明确关闭题设圆域的抽象诊断。对有界集合，遍历全部达到直径的端点对 $(p,q)$，令圆心 $c=(p+q)/2$、半径 $D/2$；对 `disk_clipped` 区域还须检查每段可行圆弧距圆心最远的点，不能只检查线段端点。
 
 这里不预设覆盖结论。等边三角形给出反例：边长为 $D$ 时外接圆半径为 $D/\sqrt3>D/2$，故直径圆未必覆盖整个定位区域。
 

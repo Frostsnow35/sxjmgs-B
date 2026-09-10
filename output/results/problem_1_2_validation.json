@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at_utc": "2026-09-10T12:48:45.809446+00:00",
+  "generated_at_utc": "2026-09-10T13:22:34.943525+00:00",
   "scope": "offline_constructed_validation_cases_only",
   "simulator_called": false,
   "runtime": {
@@ -22,7 +22,8 @@
             90.0
           ]
         ],
-        "error_deg": 0.0
+        "error_deg": 0.0,
+        "target_radius_m": 1800.0
       },
       "result": {
         "status": "point",
@@ -69,7 +70,8 @@
             90.0
           ]
         ],
-        "error_deg": 2.0
+        "error_deg": 2.0,
+        "target_radius_m": 1800.0
       },
       "result": {
         "status": "polygon",
@@ -123,7 +125,8 @@
             359.0
           ]
         ],
-        "error_deg": 1.0
+        "error_deg": 1.0,
+        "target_radius_m": null
       },
       "result": {
         "status": "unbounded",

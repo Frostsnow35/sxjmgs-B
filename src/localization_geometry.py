@@ -38,6 +38,7 @@ class LocalizationResult:
     diameter_pairs: tuple[tuple[Point, Point], ...]
     diameter_circle_covers: bool | None
     cover_centers: tuple[Point, ...]
+    boundary_kind: str = "polygon"
 
 
 @dataclass(frozen=True)
@@ -51,13 +52,19 @@ class CandidateScore:
 
 
 def locate_from_bearings(
-    observations: Sequence[Observation], error_deg: float = 1.0
+    observations: Sequence[Observation],
+    error_deg: float = 1.0,
+    target_radius_m: float | None = 1_800.0,
+    target_center: Point = (0.0, 0.0),
 ) -> LocalizationResult:
     """Intersect closed bearing cones and summarize the resulting convex set.
 
     Args:
         observations: Tuples ``(x_m, y_m, bearing_deg)`` for each detector.
         error_deg: Symmetric, deterministic angular error bound in degrees.
+        target_radius_m: Radius of the stated circular target domain.  Pass
+            ``None`` only for abstract, unbounded geometry diagnostics.
+        target_center: Centre of the target disk in metres.
 
     Returns:
         A result labelled ``empty``, ``unbounded``, ``point``, ``segment``, or
@@ -74,11 +81,28 @@ def locate_from_bearings(
 
     constraints = _bearing_halfplanes(observations, error_deg)
     candidates = _feasible_boundary_candidates(observations, constraints)
+    disk_boundary_active = False
+    if target_radius_m is not None:
+        if target_radius_m <= 0.0:
+            raise ValueError("target_radius_m must be positive or None")
+        candidates = [point for point in candidates if math.dist(point, target_center) <= target_radius_m + _TOLERANCE]
+        circle_points = _feasible_circle_intersections(constraints, target_center, target_radius_m)
+        disk_boundary_active = bool(circle_points)
+        candidates.extend(circle_points)
+        candidates = _unique_points(candidates)
     if not candidates:
         LOGGER.info("bearing intersection is empty", extra={"observations": len(observations)})
         return LocalizationResult("empty", (), None, (), None, ())
 
     vertices = tuple(_convex_hull(candidates))
+    if target_radius_m is not None and disk_boundary_active:
+        critical_points = _add_circle_antipodes(candidates, constraints, target_center, target_radius_m)
+        covers, diameter_m, centers = _disk_diameter_circle_covers(
+            critical_points, candidates, constraints, target_center, target_radius_m
+        )
+        return LocalizationResult(
+            "disk_clipped", vertices, diameter_m, _diameter_pairs(critical_points, diameter_m), covers, centers, "line_and_circle_arc"
+        )
     if _has_nonzero_recession_direction(constraints):
         LOGGER.info("bearing intersection is unbounded", extra={"observations": len(observations)})
         return LocalizationResult("unbounded", vertices, None, (), None, ())
@@ -296,6 +320,73 @@ def _feasible_boundary_candidates(
             if point is not None:
                 candidates.append(point)
     return _unique_points(point for point in candidates if _is_feasible(point, constraints))
+
+
+def _feasible_circle_intersections(
+    constraints: Sequence[_HalfPlane], center: Point, radius_m: float
+) -> list[Point]:
+    """Return feasible intersections of half-plane boundary lines and a disk."""
+    points: list[Point] = []
+    for constraint in constraints:
+        normal_length = _norm(constraint.normal)
+        signed_distance = (_dot(constraint.normal, center) - constraint.offset) / normal_length
+        if abs(signed_distance) > radius_m + _TOLERANCE:
+            continue
+        foot = (
+            center[0] - signed_distance * constraint.normal[0] / normal_length,
+            center[1] - signed_distance * constraint.normal[1] / normal_length,
+        )
+        tangent = (-constraint.normal[1] / normal_length, constraint.normal[0] / normal_length)
+        half_chord = math.sqrt(max(0.0, radius_m * radius_m - signed_distance * signed_distance))
+        for sign in (-1.0, 1.0):
+            point = (foot[0] + sign * half_chord * tangent[0], foot[1] + sign * half_chord * tangent[1])
+            if _is_feasible(point, constraints):
+                points.append(point)
+    return _unique_points(points)
+
+
+def _add_circle_antipodes(
+    points: Sequence[Point], constraints: Sequence[_HalfPlane], center: Point, radius_m: float
+) -> list[Point]:
+    """Add feasible circle points opposite each finite critical point for diameter tests."""
+    augmented = list(points)
+    for point in points:
+        direction = _subtract(point, center)
+        length = _norm(direction)
+        if length <= _TOLERANCE:
+            continue
+        opposite = (center[0] - radius_m * direction[0] / length, center[1] - radius_m * direction[1] / length)
+        if _is_feasible(opposite, constraints):
+            augmented.append(opposite)
+    return _unique_points(augmented)
+
+
+def _disk_diameter_circle_covers(
+    critical_points: Sequence[Point], boundary_points: Sequence[Point], constraints: Sequence[_HalfPlane], center: Point, radius_m: float
+) -> tuple[bool, float, tuple[Point, ...]]:
+    """Evaluate all diameter circles against line edges and permitted circular arcs."""
+    diameter_m = max(math.dist(left, right) for left in critical_points for right in critical_points)
+    pairs = _diameter_pairs(critical_points, diameter_m)
+    centers = tuple(((left[0] + right[0]) / 2.0, (left[1] + right[1]) / 2.0) for left, right in pairs)
+    covers = any(
+        _disk_region_inside_circle(circle_center, diameter_m / 2.0, boundary_points, constraints, center, radius_m)
+        for circle_center in centers
+    )
+    return covers, diameter_m, centers
+
+
+def _disk_region_inside_circle(
+    circle_center: Point, circle_radius_m: float, boundary_points: Sequence[Point], constraints: Sequence[_HalfPlane], disk_center: Point, disk_radius_m: float
+) -> bool:
+    """Check finite boundary points and the farthest feasible point on each disk arc."""
+    check_points = list(boundary_points)
+    direction = _subtract(circle_center, disk_center)
+    length = _norm(direction)
+    if length > _TOLERANCE:
+        farthest = (disk_center[0] - disk_radius_m * direction[0] / length, disk_center[1] - disk_radius_m * direction[1] / length)
+        if _is_feasible(farthest, constraints):
+            check_points.append(farthest)
+    return all(math.dist(circle_center, point) <= circle_radius_m + _TOLERANCE for point in check_points)
 
 
 def _line_intersection(left: _HalfPlane, right: _HalfPlane) -> Point | None:

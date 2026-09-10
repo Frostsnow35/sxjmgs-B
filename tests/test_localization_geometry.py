@@ -46,10 +46,28 @@ def test_parallel_exact_bearings_with_no_shared_point_are_empty() -> None:
 
 def test_single_nonzero_error_bearing_is_unbounded() -> None:
     """One angular cone alone cannot have a finite localization diameter."""
-    result = locate_from_bearings(((0.0, 0.0, 359.0),), error_deg=1.0)
+    result = locate_from_bearings(
+        ((0.0, 0.0, 359.0),),
+        error_deg=1.0,
+        target_radius_m=None,
+    )
 
     assert result.status == "unbounded"
     assert result.diameter_m is None
+
+
+def test_target_disk_clips_single_bearing_to_a_finite_region() -> None:
+    """The stated circular target domain must bound a one-bearing region exactly."""
+    result = locate_from_bearings(
+        ((0.0, 0.0, 0.0),),
+        error_deg=1.0,
+        target_radius_m=100.0,
+    )
+
+    assert result.status == "disk_clipped"
+    assert result.diameter_m == pytest.approx(100.0)
+    assert all(math.hypot(*point) <= 100.0 + 1e-8 for point in result.vertices)
+    assert result.diameter_circle_covers is False
 
 
 def test_crossing_zero_degree_is_treated_continuously() -> None:

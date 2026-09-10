@@ -50,7 +50,11 @@ def build_validation_report() -> dict[str, Any]:
     wrapped_result = locate_from_bearings(wrapped_observations, error_deg=2.0)
 
     unbounded_observations = ((0.0, 0.0, 359.0),)
-    unbounded_result = locate_from_bearings(unbounded_observations, error_deg=1.0)
+    unbounded_result = locate_from_bearings(
+        unbounded_observations,
+        error_deg=1.0,
+        target_radius_m=None,
+    )
 
     equilateral_vertices = ((0.0, 0.0), (2.0, 0.0), (1.0, 3.0**0.5))
     triangle_covers, triangle_diameter_m, triangle_centers = diameter_circle_covers(equilateral_vertices)
@@ -89,17 +93,17 @@ def build_validation_report() -> dict[str, Any]:
         "model_contract": "docs/problem_1_2_model_contract.md",
         "problem_1": {
             "exact_intersection": {
-                "input": {"observations": exact_observations, "error_deg": 0.0},
+                "input": {"observations": exact_observations, "error_deg": 0.0, "target_radius_m": 1_800.0},
                 "result": _localization_payload(exact_result),
                 "expected_property": "two orthogonal exact rays intersect at one point",
             },
             "zero_degree_wrap": {
-                "input": {"observations": wrapped_observations, "error_deg": 2.0},
+                "input": {"observations": wrapped_observations, "error_deg": 2.0, "target_radius_m": 1_800.0},
                 "result": _localization_payload(wrapped_result),
                 "expected_property": "the 359-degree cone is continuous across zero degrees",
             },
             "unbounded_single_bearing": {
-                "input": {"observations": unbounded_observations, "error_deg": 1.0},
+                "input": {"observations": unbounded_observations, "error_deg": 1.0, "target_radius_m": None},
                 "result": _localization_payload(unbounded_result),
                 "expected_property": "one nonzero-error bearing has no finite diameter",
             },

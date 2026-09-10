@@ -17,6 +17,7 @@ def test_validation_report_records_offline_cases_without_simulator_claims() -> N
     assert report["scope"] == "offline_constructed_validation_cases_only"
     assert report["simulator_called"] is False
     assert report["problem_1"]["exact_intersection"]["result"]["status"] == "point"
+    assert report["problem_1"]["unbounded_single_bearing"]["result"]["status"] == "unbounded"
     assert report["problem_1"]["equilateral_triangle"]["diameter_circle_covers"] is False
     assert report["problem_2"]["best_candidate"]["point"] == [0.0, 100.0]
     assert report["problem_2"]["source_region_grid"]["grid_spacing_m"] == 100.0
