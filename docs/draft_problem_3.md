@@ -3,6 +3,7 @@
 > 更新日期：2026-09-11
 > 状态：论文初稿；几何结论和演练记录的统计口径已冻结，尚未进行正式测试。
 > 证据范围：本文的多轮结果来自本地归档的模拟器侧结果摘要与客户端脱敏动作记录的时间配对，均为模拟演练；不使用 LocalEnv 结果替代模拟器结果。
+> 引用说明：公开文献仅用于说明本文实际采用的有限顶点 MEC 与多边形裁剪实现；题设、接口与演练结果的可复核来源见 `docs/citation_provenance.md`，不混入公开参考文献表。七点覆盖、集合包含和网格清除保证均由本文推导，不由文献替代证明。
 
 ## 5 问题三：全向干扰源自动定位与清除
 
@@ -27,7 +28,7 @@ $$
 F=\Omega\cap\bigcap_j C(S_j,\theta_j)\cap\bigcap_j B(S_j,1500).\tag{22}
 $$
 
-程序使用每个半径 $1500\ \mathrm{m}$ 圆盘的外接正 $180$ 边形进行裁剪，所得 $\widehat F$ 是 $F$ 的保守外近似，即 $F\subseteq\widehat F$。文中不把该离散实现称作精确圆弧裁剪。只有 `/clear` 响应同时满足 HTTP 正常、`accepted=true` 且 `clear_result=success` 时，才将该频道记为已清除；一次 `no_signal`、定位多边形的数值异常或候选耗尽均不等同于源不存在。
+程序使用每个半径 $1500\ \mathrm{m}$ 圆盘的外接正 $180$ 边形进行裁剪，所得 $\widehat F$ 是 $F$ 的保守外近似，即 $F\subseteq\widehat F$。有限顶点多边形按逐半平面重入裁剪实现，该实现框架对应 Sutherland--Hodgman 裁剪方法[2]；文中不把该离散实现称作精确圆弧裁剪。只有 `/clear` 响应同时满足 HTTP 正常、`accepted=true` 且 `clear_result=success` 时，才将该频道记为已清除；一次 `no_signal`、定位多边形的数值异常或候选耗尽均不等同于源不存在。
 
 ### 5.3 七点巡测的发现保证
 
@@ -58,7 +59,7 @@ $$
 R_0\le\frac{1500}{2\cos^2(1^\circ)}\approx750.23\ \mathrm{m}<1000\ \mathrm{m}.\tag{25}
 $$
 
-若当前 $\widehat F$ 的 MEC 为 $B(c,R)$，由于 $G\in F\subseteq\widehat F\subseteq B(c,R)$，当 $R\le20\ \mathrm{m}$ 时，在 $c$ 点清除必满足距离条件；当 $20<R<1000\ \mathrm{m}$ 时，又有 $\|c-G\|_2<1000\ \mathrm{m}$。全向源在 $c$ 处因而仍保证可接收，新的方向读数可继续加入式（22）收缩可行域。每轮收缩后重新计算 MEC，直至半径不超过 $20\ \mathrm{m}$ 或转入网格回退。
+若当前 $\widehat F$ 的 MEC 为 $B(c,R)$，由于 $G\in F\subseteq\widehat F\subseteq B(c,R)$，当 $R\le20\ \mathrm{m}$ 时，在 $c$ 点清除必满足距离条件；当 $20<R<1000\ \mathrm{m}$ 时，又有 $\|c-G\|_2<1000\ \mathrm{m}$。实现对 $\widehat F$ 的有限顶点集使用固定随机种子的 Welzl 随机增量算法计算 MEC[1]。全向源在 $c$ 处因而仍保证可接收，新的方向读数可继续加入式（22）收缩可行域。每轮收缩后重新计算 MEC，直至半径不超过 $20\ \mathrm{m}$ 或转入网格回退。
 
 上述做法没有假设读数误差服从某种分布，亦不把多次读数平均成无误差直线。它以闭角域相交保留确定性误差边界，并利用 MEC 给出“下一检测点仍处于最小接收半径内”的可验证条件。
 
@@ -106,3 +107,9 @@ $$
 本模型的优势在于将“发现”“定位”“清除”分别对应到可检验的几何条件：式（23）提供发现覆盖余量，式（22）保留误差可行域，式（26）给出清除候选的有限覆盖证书。相较于直接最小二乘定位后有限次逼近的做法，该框架不会因为一次观测或数值估计不稳定而直接丢弃已发现频道。
 
 局限性也需保留。其一，$180$ 边形是保守外近似，边数改变时应重新核验包含关系和数值稳定性；其二，网格回退以保证性优先，定位区域较大时会增加虚拟时间；其三，表 5 的各轮源布局不同，不能据此比较本策略与其他算法的速度优劣；其四，正式测试尚未进行，任何后续正式测试均须由操作者重新确认界面模式并取得当次明确授权。
+
+### 5.9 参考文献
+
+[1] WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359-370. DOI: 10.1007/BFb0038202.
+
+[2] SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32-42. DOI: 10.1145/360767.360802.
