@@ -21,25 +21,25 @@
 
 ### 问题三初稿使用的引用
 
-[1] WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359-370. DOI: 10.1007/BFb0038202.
+- **[1]** WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359–370. DOI: [10.1007/BFb0038202](https://doi.org/10.1007/BFb0038202).
 
 > 使用位置：有限顶点集最小包围圆的随机增量算法实现，见 `geometry.py` 中 `min_enclosing_circle`。
 
-[2] SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32-42. DOI: 10.1145/360767.360802.
+- **[2]** SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32–42. DOI: [10.1145/360767.360802](https://doi.org/10.1145/360767.360802).
 
 > 使用位置：凸可行域多边形逐半平面裁剪实现，见 `geometry.py` 中 `clip_polygon`。
 
-[3] HELD M, KARP R M. A dynamic programming approach to sequencing problems[J]. Journal of the Society for Industrial and Applied Mathematics, 1962, 10(1): 196-210. DOI: 10.1137/0110015.
+- **[3]** HELD M, KARP R M. A dynamic programming approach to sequencing problems[J]. Journal of the Society for Industrial and Applied Mathematics, 1962, 10(1): 196–210. DOI: [10.1137/0110015](https://doi.org/10.1137/0110015).
 
 > 使用位置：清除阶段首个动作点的最短哈密顿路径精确排序，见 `geometry.py` 中 `order_points_exact_tsp`；论文只引用其动态规划思想，不把该文献当作本题几何覆盖或清除正确性的证明。DOI、作者、刊名、卷期和页码已于 2026-09-12 通过 Crossref 元数据核验。
 
 ### 问题四初稿使用的引用
 
-[1] WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359-370. DOI: 10.1007/BFb0038202.
+- **[1]** WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359–370. DOI: [10.1007/BFb0038202](https://doi.org/10.1007/BFb0038202).
 
 > 使用位置：同问题三，MEC 计算。
 
-[2] VIRTANEN P, GOMMERS R, OLIPHANT T E, et al. SciPy 1.0: Fundamental algorithms for scientific computing in Python[J]. Nature Methods, 2020, 17(3): 261-272. DOI: 10.1038/s41592-019-0686-2.
+- **[2]** VIRTANEN P, GOMMERS R, OLIPHANT T E, et al. SciPy 1.0: Fundamental algorithms for scientific computing in Python[J]. Nature Methods, 2020, 17(3): 261–272. DOI: [10.1038/s41592-019-0686-2](https://doi.org/10.1038/s41592-019-0686-2).
 
 > 使用位置：三角格巡测的离线核验，使用 `scipy.spatial.Delaunay` 与 `ConvexHull` 检查 42 个与目标圆盘相交的三角形及最长边；对应代码见 `survey_design.py`。
 

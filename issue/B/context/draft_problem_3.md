@@ -141,7 +141,9 @@ $$
 
 为防止以脚本文件名替代实际题号，本文首先核对 `JLOG/p3-tenTrial-2/` 每个日志信封中的 `problem_no=3`，再将其与同批次客户端脱敏汇总 `drill_batch_q3.jsonl` 的进入、退出和动作计数对应。表 5 的成功清除数、测向次数与虚拟时间来自该批次客户端汇总；JLOG 用于确认批次身份与题号。由于该最新批次尚未纳入旧版 `evidence_manifest.json` 的跨目录时间配对表，本文不把 127 写成独立模拟器结果摘要中的 `jammer_count`，而明确称为客户端已接受的成功清除响应数。所有记录均为模拟演练，不是正式测试。
 
-表 5  问题三最新十连测模拟演练统计（外环 $1124\ \mathrm{m}$、试探清除阈值 $80\ \mathrm{m}$）
+#### 表 5　问题三最新十连测模拟演练统计
+
+外环半径为 $1124\ \mathrm{m}$，试探清除阈值为 $80\ \mathrm{m}$。
 
 | 指标 | 数值 | 口径 |
 |---|---:|---|
@@ -188,8 +190,8 @@ $$
 
 ### 5.10 参考文献
 
-[1] WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359-370. DOI: 10.1007/BFb0038202.
+- **[1]** WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359–370. DOI: [10.1007/BFb0038202](https://doi.org/10.1007/BFb0038202).
 
-[2] SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32-42. DOI: 10.1145/360767.360802.
+- **[2]** SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32–42. DOI: [10.1145/360767.360802](https://doi.org/10.1145/360767.360802).
 
-[3] HELD M, KARP R M. A dynamic programming approach to sequencing problems[J]. Journal of the Society for Industrial and Applied Mathematics, 1962, 10(1): 196-210. DOI: 10.1137/0110015.
+- **[3]** HELD M, KARP R M. A dynamic programming approach to sequencing problems[J]. Journal of the Society for Industrial and Applied Mathematics, 1962, 10(1): 196–210. DOI: [10.1137/0110015](https://doi.org/10.1137/0110015).
