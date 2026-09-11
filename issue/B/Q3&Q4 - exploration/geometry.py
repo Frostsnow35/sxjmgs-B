@@ -107,6 +107,26 @@ def clean_points(poly: Sequence[tuple[float, float]],
     return out
 
 
+def convex_hull(points: Sequence[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Monotone-chain convex hull of a small point set (CCW order, no repeat)."""
+    pts = sorted(set((round(x, 9), round(y, 9)) for x, y in points))
+    if len(pts) <= 1:
+        return pts
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower = []
+    for p in pts:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 1e-12:
+            lower.pop()
+        lower.append(p)
+    upper = []
+    for p in reversed(pts):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 1e-12:
+            upper.pop()
+        upper.append(p)
+    return lower[:-1] + upper[:-1]
+
+
 def polygon_area(poly: Sequence[tuple[float, float]]) -> float:
     if len(poly) < 3:
         return 0.0
@@ -335,3 +355,57 @@ def route_length(points: Sequence[tuple[float, float]],
         total += math.dist(cur, p)
         cur = p
     return total
+
+
+def order_points_exact_tsp(points: Sequence[tuple[float, float]],
+                           start: tuple[float, float],
+                           max_exact: int = 18) -> list[tuple[float, float]]:
+    """Exact shortest Hamiltonian path by Held-Karp for small point sets.
+
+    `points` are the locations that must be visited once; the route starts at
+    `start`.  For at most `max_exact` points this is optimal.
+    """
+    pts = list(points)
+    n = len(pts)
+    if n == 0:
+        return []
+    if n > max_exact:
+        return order_route(pts, start)
+
+    d = [[0.0] * (n + 1) for _ in range(n + 1)]
+    nodes = [start] + pts
+    for i in range(n + 1):
+        for j in range(i + 1, n + 1):
+            d[i][j] = d[j][i] = math.dist(nodes[i], nodes[j])
+
+    size = 1 << n
+    dp = [[float("inf")] * n for _ in range(size)]
+    parent = [[-1] * n for _ in range(size)]
+    for i in range(n):
+        dp[1 << i][i] = d[0][i + 1]
+    for mask in range(1, size):
+        for last in range(n):
+            if not (mask & (1 << last)):
+                continue
+            cur = dp[mask][last]
+            if cur == float("inf"):
+                continue
+            for nxt in range(n):
+                if mask & (1 << nxt):
+                    continue
+                nmask = mask | (1 << nxt)
+                val = cur + d[last + 1][nxt + 1]
+                if val < dp[nmask][nxt] - 1e-9:
+                    dp[nmask][nxt] = val
+                    parent[nmask][nxt] = last
+    full = size - 1
+    last = min(range(n), key=lambda i: dp[full][i])
+    order = [last]
+    mask = full
+    while parent[mask][last] >= 0:
+        prev = parent[mask][last]
+        order.append(prev)
+        mask ^= 1 << last
+        last = prev
+    order.reverse()
+    return [pts[i] for i in order]

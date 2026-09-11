@@ -1,0 +1,22 @@
+{
+  "trial": "p3-trial-2",
+  "rounds": 3,
+  "cleared_per_round": [14, 10, 11],
+  "virtual_time_per_round_s": [5106.181994, 4332.79194, 4853.95528],
+  "avg_time_per_source_s": [364.72728528571423, 433.279194, 441.26866181818184],
+  "total_cleared": 35,
+  "total_virtual_time_s": 14292.929214,
+  "batch_avg_s_per_source": 408.36940611428574,
+  "measure_actions_per_round": [131, 141, 138],
+  "clear_actions_per_round": [14, 10, 11],
+  "case_codes": [
+    "RQ3T-M7CT-SBPA-SDRN",
+    "XWY5-9S9Q-DSWE-UK9U",
+    "XR2K-7F2Q-2A9N-V8WD"
+  ],
+  "logs": [
+    "robot_q3_round01.jsonl",
+    "robot_q3_round02.jsonl",
+    "robot_q3_round03.jsonl"
+  ]
+}

@@ -15,6 +15,7 @@ only affects tie-breaking and not the result).
 from __future__ import annotations
 
 import math
+import os
 from dataclasses import dataclass, field
 
 import geometry as geo
@@ -24,6 +25,10 @@ CHANNELS = list(range(1, 21))
 CLEAR_RADIUS = 20.0
 MAX_Q3_ITER = 15
 MAX_Q4_ITER = 6
+Q3_USE_SAFE_NEGATIVES = False
+Q3_SPECULATIVE_RADIUS = float(os.getenv("Q3_SPECULATIVE_RADIUS", "80.0"))
+Q3_ONLINE_CLEAR_RADIUS = float(os.getenv("Q3_ONLINE_CLEAR_RADIUS", "40.0"))
+Q3_ONLINE_DETOUR = float(os.getenv("Q3_ONLINE_DETOUR", "300.0"))
 PERP_PROBE_DIST = 100.0
 SECTOR_TRACK_HALF_ANGLE = 0.5
 SECTOR_TRACK_STEP = 30.0
@@ -32,14 +37,21 @@ SECTOR_TRACK_STEP = 30.0
 # Survey point sets
 # ---------------------------------------------------------------------------
 
-def q3_survey_points() -> list[tuple[float, float]]:
-    """7 points covering the radius-1800 disk with covering radius 900.
+def q3_survey_points(outer_radius: float = 1124.0) -> list[tuple[float, float]]:
+    """7 points covering the radius-1800 disk.
 
-    One point at the origin and six points on a regular hexagon of radius
-    900*sqrt(3).  For an omni source r>=1000, the nearest survey point is at
-    most 900 m away, so every source is detected.
+    One point at the origin and six points on a regular hexagon.  The outer
+    radius is chosen just large enough to keep the maximum distance from any
+    arena point to its nearest survey point below 1000 m:
+
+        max_gap(1124) = sqrt(1800^2 + 1124^2
+                             - 2*1800*1124*cos(30 deg))
+                      = 999.545 m < 1000 m.
+
+    This is much shorter than the 900*sqrt(3) hexagon that minimises the
+    covering radius; the saved survey travel outweighs the smaller margin.
     """
-    a = 900.0 * math.sqrt(3.0)
+    a = float(outer_radius)
     pts = [(0.0, 0.0)]
     for k in range(6):
         t = math.pi / 3.0 * k
@@ -174,19 +186,21 @@ def _scan_at(iface, point: tuple[float, float], data: dict[int, ChannelData],
 
 def survey(iface, points: list[tuple[float, float]],
            start: tuple[float, float] | None = None,
-           min_signals: int = 20):
+           min_signals: int = 20,
+           route: list[tuple[float, float]] | None = None):
     """Visit `points`, scanning channels at each point.
 
     `min_signals=20` means scan every channel at every point (full survey).
     Smaller values stop scanning a channel after `min_signals` useful bearings
     have been collected; this saves detection/switch time without weakening
-    the discovery guarantee.
+    the discovery guarantee.  If `route` is supplied it is used verbatim.
     """
     data = {ch: ChannelData() for ch in CHANNELS}
     enough: set[int] = set()
     if start is None:
         start = iface.pos
-    route = geo.order_route(points, start)
+    if route is None:
+        route = geo.order_route(points, start)
     for p in route:
         _scan_at(iface, p, data, enough, min_signals)
     return data
@@ -228,6 +242,25 @@ def _joint_projection_summary(poly, signals, no_signal_points):
         return None
     center, radius = geo.min_enclosing_circle([sample.position for sample in samples])
     return center, radius, len(samples)
+
+
+def _sample_feasible_set(poly, safe_negatives, step=25.0):
+    """Deterministic grid sample of F minus the safe negative disks."""
+    if not poly:
+        return []
+    xmin, xmax, ymin, ymax = geo.polygon_bbox(poly)
+    pts = []
+    x = xmin
+    while x <= xmax + 1e-9:
+        y = ymin
+        while y <= ymax + 1e-9:
+            p = (x, y)
+            if geo.point_in_convex_polygon(p, poly, eps=1e-6) and \
+               all(math.dist(p, q) > 1000.0 + 1e-7 for q in safe_negatives):
+                pts.append(p)
+            y += step
+        x += step
+    return pts
 
 
 def _sector_cover_points(point: tuple[float, float], center_deg: float,
@@ -303,34 +336,62 @@ def clear_channel_q3(iface, channel: int, d: ChannelData) -> bool:
 
     signals = list(d.signals)
     disk_centers = [p for p, _ in signals]
+    # In Q3 every no_signal point is a safe negative constraint:
+    # the source is omni, so no_signal means |G-Q| > r >= 1000 m.
+    safe_negatives = list(d.no_signal_points) if Q3_USE_SAFE_NEGATIVES else []
+
     poly = _rebuild_poly(signals, disk_centers)
     if not poly:
         return False
+
+    def _try_sample_clear():
+        if not safe_negatives:
+            return False
+        samples = _sample_feasible_set(poly, safe_negatives, step=40.0)
+        if not samples:
+            return False
+        (sx, sy), sr = geo.min_enclosing_circle(samples)
+        if sr <= CLEAR_RADIUS + 1e-6 and _clear_at(iface, (sx, sy), channel):
+            return True
+        return False
+
+    if _try_sample_clear():
+        return True
 
     for _ in range(MAX_Q3_ITER):
         (cx, cy), radius = geo.min_enclosing_circle(poly)
         if radius <= CLEAR_RADIUS + 1e-6:
             if _clear_at(iface, (cx, cy), channel):
                 return True
-            return _cover_and_clear(iface, poly, channel, signals)
+            return _cover_and_clear(iface, poly, channel, signals, safe_negatives)
+
+        # Cheap speculative clear when the feasible disk is only slightly too
+        # large; a failed clear costs 3 s and leaves us at c for the measure.
+        if radius <= Q3_SPECULATIVE_RADIUS:
+            if _clear_at(iface, (cx, cy), channel):
+                return True
 
         res = iface.measure((cx, cy), channel)
         if res.measure_result == "near":
             if _clear_at(iface, (cx, cy), channel):
                 return True
-            return _cover_and_clear(iface, poly, channel, signals)
+            return _cover_and_clear(iface, poly, channel, signals, safe_negatives)
         if res.measure_result == "direction":
             signals.append(((cx, cy), res.svd_deg))
             disk_centers.append((cx, cy))
             poly = _rebuild_poly(signals, disk_centers)
             if not poly:
                 poly = _rebuild_poly(signals[:1], [signals[0][0]])
+            if _try_sample_clear():
+                return True
             continue
-        # For an omni source this should not happen.  Fall back to guaranteed
-        # grid covering of the current conservative feasible set.
-        return _cover_and_clear(iface, poly, channel, signals)
+        # no_signal at the proposed point is impossible under the MEC bound
+        # for an omni source; treat it as an additional safe negative.
+        if Q3_USE_SAFE_NEGATIVES:
+            safe_negatives.append((cx, cy))
+        return _cover_and_clear(iface, poly, channel, signals, safe_negatives)
 
-    return _cover_and_clear(iface, poly, channel, signals)
+    return _cover_and_clear(iface, poly, channel, signals, safe_negatives)
 
 
 def clear_channel_q4(iface, channel: int, d: ChannelData) -> bool:
@@ -480,9 +541,42 @@ def clear_all(iface, mode: str, data: dict[int, ChannelData]) -> tuple[int, int]
     return cleared, failed
 
 
+def survey_q3_with_online_clear(iface, points, min_signals=2):
+    """Q3 survey with opportunistic online clearing.
+
+    While walking the survey route, a channel whose conservative feasible
+    disk already has radius <= Q3_ONLINE_CLEAR_RADIUS and whose centre is
+    within Q3_ONLINE_DETOUR of the current survey point is cleared
+    immediately.  This removes it from the final clearing TSP.
+    """
+    data = {ch: ChannelData() for ch in CHANNELS}
+    enough: set[int] = set()
+    cleared: set[int] = set()
+    route = list(points)
+    for p in route:
+        _scan_at(iface, p, data, enough | cleared, min_signals)
+        for ch in list(enough):
+            if ch in cleared:
+                continue
+            d = data[ch]
+            if not d.signals:
+                continue
+            poly = _rebuild_poly(d.signals, [x for x, _ in d.signals])
+            if not poly:
+                continue
+            (cx, cy), radius = geo.min_enclosing_circle(poly)
+            if radius <= Q3_ONLINE_CLEAR_RADIUS and \
+               math.dist(iface.pos, (cx, cy)) <= Q3_ONLINE_DETOUR:
+                if _clear_at(iface, (cx, cy), ch):
+                    cleared.add(ch)
+    for ch in cleared:
+        data[ch] = ChannelData()
+    return data, cleared
+
+
 def run_q3(iface) -> dict:
     pts = q3_survey_points()
-    data = survey(iface, pts, iface.pos, min_signals=2)
+    data = survey(iface, pts, iface.pos, min_signals=2, route=list(pts))
     cleared, failed = clear_all(iface, "q3", data)
     return {
         "survey_points": pts,
