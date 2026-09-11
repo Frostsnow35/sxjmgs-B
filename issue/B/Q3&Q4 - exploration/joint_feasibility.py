@@ -107,6 +107,53 @@ def _feasible_arc_count(vectors: Sequence[Point], valid) -> int:
     return count
 
 
+def _convex_hull(points: Sequence[Point]) -> list[Point]:
+    """Return the CCW monotone-chain hull without relying on mutable helpers."""
+
+    unique = sorted(set((round(x, 9), round(y, 9)) for x, y in points))
+    if len(unique) <= 1:
+        return unique
+
+    def cross(origin: Point, left: Point, right: Point) -> float:
+        return (
+            (left[0] - origin[0]) * (right[1] - origin[1])
+            - (left[1] - origin[1]) * (right[0] - origin[0])
+        )
+
+    lower: list[Point] = []
+    for point in unique:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], point) <= ANGLE_EPS:
+            lower.pop()
+        lower.append(point)
+    upper: list[Point] = []
+    for point in reversed(unique):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], point) <= ANGLE_EPS:
+            upper.pop()
+        upper.append(point)
+    return lower[:-1] + upper[:-1]
+
+
+def _point_in_convex_hull(point: Point, hull: Sequence[Point]) -> bool:
+    """Return whether a point lies in a CCW convex hull, boundary included."""
+
+    if len(hull) < 3:
+        return False
+    sign = 0
+    for index, start in enumerate(hull):
+        end = hull[(index + 1) % len(hull)]
+        cross = (
+            (end[0] - start[0]) * (point[1] - start[1])
+            - (end[1] - start[1]) * (point[0] - start[0])
+        )
+        if abs(cross) <= 1e-7:
+            continue
+        current = 1 if cross > 0.0 else -1
+        if sign and current != sign:
+            return False
+        sign = current
+    return True
+
+
 def safe_negative_points(
     signals: Sequence[Signal], no_signal_points: Sequence[Point]
 ) -> list[Point]:
@@ -120,12 +167,12 @@ def safe_negative_points(
 
     if len(signals) < 3 or not no_signal_points:
         return []
-    hull = geo.convex_hull([point for point, _ in signals])
+    hull = _convex_hull([point for point, _ in signals])
     if len(hull) < 3:
         return []
     return [
         point for point in no_signal_points
-        if geo.point_in_convex_polygon(point, hull, eps=1e-7)
+        if _point_in_convex_hull(point, hull)
     ]
 
 
