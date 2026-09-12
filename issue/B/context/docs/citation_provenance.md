@@ -10,11 +10,11 @@
 | 模拟器使用说明 | `附件/1.docx` | 测试入口、计时规则、日志导出规则 |
 | 模拟器通信接口说明 | `附件/2.docx` | HTTP+JSON 协议、`/measure`、`/clear` 语义 |
 | 模拟器演练行为日志 | `JLOG/p3-tenTrial-1/*.jlog`、`JLOG/p4-tenTrial-1/*.jlog` | 演练身份与案例编码核验 |
-| 最新问题三演练行为日志 | `JLOG/p3-tenTrial-2/*.jlog` | 2026-09-11 外环 1124 m 版本十连测；10 个日志文件的日志头均为 `problem_no=3` |
+| 最新问题三演练行为日志 | `JLOG/p3-trial-9/*.jlog` | 2026-09-12 最新三轮 Q3 演练；3 个日志信封的 `problem_no` 均为 3 |
 | 客户端脱敏动作记录 | `Q3&Q4 - exploration/robot_q3_round*.jsonl`、`robot_q4_round*.jsonl` | 逐轮动作、成功清除计数、虚拟时间 |
 | 批处理汇总 | `Q3&Q4 - exploration/drill_batch_q3.jsonl`、`drill_batch_q4.jsonl` | 十轮批次统计 |
-| 最新问题三批次客户端汇总 | `Q3&Q4 - exploration/drill_batch_q3.jsonl` 的最后 10 条记录 | p3-tenTrial-2 的逐轮成功数、测向次数、清除请求、虚拟时间与均值；总虚拟时间按详细记录求和 |
-| 最新问题三批次控制台日志 | `Q3&Q4 - exploration/q3_10round_v5_console.out.log` | p3-tenTrial-2 的人工可读逐轮运行摘要 |
+| 最新问题三批次客户端动作记录 | `Q30912sol/数据6/B3_review_round01_122246.jsonl`、`02_122327.jsonl`、`03_122341.jsonl` | 最新三轮逐轮 `/measure`、`/clear`、虚拟时间和成功结果；与 JLOG 不做逐文件加密载荷配对 |
+| 最新问题三批次控制台日志 | `Q30912sol/数据6/q30912_reviewable_3x_r3_console.out.log` | 最新三轮人工可读运行摘要 |
 | 本地模拟器 | `Q3&Q4 - exploration/local_env.py` | 仅用于本地蒙特卡洛，不替代模拟器演练结果 |
 
 ## 2. 公开文献引用清单
@@ -23,15 +23,15 @@
 
 - **[1]** WELZL E. Smallest enclosing disks (balls and ellipsoids)[C]//New Results and New Trends in Computer Science. Berlin, Heidelberg: Springer, 1991: 359–370. DOI: [10.1007/BFb0038202](https://doi.org/10.1007/BFb0038202).
 
-> 使用位置：有限顶点集最小包围圆的随机增量算法实现，见 `geometry.py` 中 `min_enclosing_circle`。
+> 使用位置：有限顶点集最小包围圆方法背景；当前 Q3 求解器使用自编确定性增量实现，见 `B3_robot_solver_v6_reviewable.py` 的 `minimum_enclosing_circle`。
 
 - **[2]** SUTHERLAND I E, HODGMAN G W. Reentrant polygon clipping[J]. Communications of the ACM, 1974, 17(1): 32–42. DOI: [10.1145/360767.360802](https://doi.org/10.1145/360767.360802).
 
-> 使用位置：凸可行域多边形逐半平面裁剪实现，见 `geometry.py` 中 `clip_polygon`。
+> 使用位置：凸可行域多边形逐半平面裁剪实现，见 `B3_robot_solver_v6_reviewable.py` 的 `clip_halfplane`。
 
 - **[3]** HELD M, KARP R M. A dynamic programming approach to sequencing problems[J]. Journal of the Society for Industrial and Applied Mathematics, 1962, 10(1): 196–210. DOI: [10.1137/0110015](https://doi.org/10.1137/0110015).
 
-> 使用位置：清除阶段首个动作点的最短哈密顿路径精确排序，见 `geometry.py` 中 `order_points_exact_tsp`；论文只引用其动态规划思想，不把该文献当作本题几何覆盖或清除正确性的证明。DOI、作者、刊名、卷期和页码已于 2026-09-12 通过 Crossref 元数据核验。
+> 使用位置：当目标数不超过 `DP_MAX_TARGETS=11` 时，清除阶段首个动作点的开放路径排序，见 `B3_robot_solver_v6_reviewable.py` 的 `_shortest_open_path` / `_route_plan`；目标较多时程序使用最近邻加 2-opt，不把该文献当作本题几何覆盖或清除正确性的证明。DOI、作者、刊名、卷期和页码已于 2026-09-12 通过 Crossref 元数据核验。
 
 ### 问题四初稿使用的引用
 
