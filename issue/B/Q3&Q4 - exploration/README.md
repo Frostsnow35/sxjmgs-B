@@ -14,7 +14,7 @@
 | `local_env.py` | 按题目与附件规则编写的本地模拟器（非官方模拟器） |
 | `monte_carlo_test.py` | 本地蒙特卡洛演练脚本 |
 | `run_safe_rehearsal.py` | **仅演练**的安全入口；需显式人工确认 UI，绝不提供正式测试选项 |
-| `robot_client.py`、`run_drill_batch*.py` | 历史运行器与批处理记录，仅作复盘；不得作为后续执行入口 |
+| `run_safe_rehearsal.py` | 当前唯一的 Q3/Q4 模拟演练入口；需显式人工确认 UI，绝不提供正式测试选项 |
 | `build_evidence_manifest.py` | 从自留 JSONL、模拟器结果侧文件和 JLOG 重建脱敏证据清单，不连接模拟器 |
 | `evidence_manifest.json` | 已冻结的批次配对、分类和统计结果；不含队号、票据、密钥或案例编码 |
 | `survey_design.py` | 巡测点设计验证与地图绘制 |
@@ -22,6 +22,12 @@
 | `monte_carlo_q3.json` | Q3 本地演练 100 个案例结果 |
 | `monte_carlo_q4.json` | Q4 本地演练 100 个案例结果 |
 | `*.png` | 巡测点地图与 Q2 候选区域热力图 |
+
+## 当前 Q4 方案边界
+
+Q4 的唯一维护版本由 `strategy.py`、`joint_feasibility.py` 和 `geometry.py` 组成：25 点双环巡测、位置—朝向联合可行性采样排序、MEC 复测以及保守覆盖清除。其直接测试为 `test_joint_feasibility.py`，配对评估为 `evaluate_joint_projection.py`，结果见 `joint_projection_localenv.json`。
+
+旧版独立客户端和批处理运行器已从仓库移除；历史演练统计仅保留为脱敏证据，不再作为执行入口。
 
 ## 冻结的证据口径
 

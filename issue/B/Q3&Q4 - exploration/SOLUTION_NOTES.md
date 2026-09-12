@@ -158,4 +158,4 @@ $$
 - `run_safe_rehearsal.py` 只接受 `--rehearsal-confirmed` 的 Q3/Q4 演练；缺失该标志时不构造客户端、不探测端口、不调用 `/enter`。
 - 每个新动作使用新 `request_id`，网络异常重试时严格复用原请求与原 `request_id`；HTTP 状态与 `accepted` 同时检查。
 - `/clear` 不改变测向机当前频道；只有被接受的 `/measure` 更新当前频道。剩余真实时间字段无效或低于 17 s 安全余量时停止新业务动作，并尽力 `/exit`。
-- 审计 JSONL 记录脱敏请求与响应；原始 JLOG 与身份相关元数据仅留本地支撑材料。历史 `robot_client.py` 及批处理脚本不得作为后续运行入口。
+- 审计 JSONL 记录脱敏请求与响应；原始 JLOG 与身份相关元数据仅留本地支撑材料。旧版独立客户端和批处理运行器已移除；后续模拟演练只使用 `run_safe_rehearsal.py`。
