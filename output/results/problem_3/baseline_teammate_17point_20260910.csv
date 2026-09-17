@@ -1,2 +1,0 @@
-test_label,timestamp,found_channels,cleared_channels,failed_channels,clear_rate,total_virtual_time_s,scan_measures,approach_measures,failed_detail,evidence_scope
-run_1,2026-09-10 23:33:21,12,12,0,100.0%,10896.8,340,46,,teammate 17-point rehearsal summary; denominator is found channels rather than simulator-reported total sources
